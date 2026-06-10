@@ -10,6 +10,7 @@
     history: [],
     historyIndex: 0,
     scanned: false,
+    tuned: false,
     bootedAt: new Date(),
     unlocked: new Set(),
   };
@@ -30,7 +31,7 @@
     fortune: "print a small fortune",
     pwd: "print current directory",
     tree: "map the visible file system",
-    scan: "look for hidden files",
+    scan: "check nearby routes",
     clear: "clear the screen",
   };
 
@@ -41,6 +42,9 @@
     "The secret command was curiosity all along.",
     "Good interfaces leave fingerprints, not bruises.",
   ];
+
+  const HOLY_WARS_PATH = "/HolyWarsGame";
+  const REDIRECT_DELAY_MS = 800;
 
   function scrollToBottom() {
     screen.scrollTop = screen.scrollHeight;
@@ -118,9 +122,6 @@
     printCommandList(COMMANDS);
     if (state.unlocked.has("warp")) {
       appendLine(["  ", { type: "command", value: "warp" }, " - use the tucked-away shortcut"]);
-    }
-    if (state.unlocked.has("holywars")) {
-      appendLine(["  ", { type: "command", value: "holywars" }, " - follow the bell static"]);
     }
     blank();
     appendLine("known links:");
@@ -241,11 +242,14 @@
     appendLine("|-- projects");
     if (state.scanned) {
       appendLine("|-- .eggs");
-      appendLine("`-- .relic");
+      appendLine("`-- static/");
+      if (state.tuned) {
+        appendLine("    `-- .relic");
+      }
       return;
     }
 
-    appendLine("`-- [hidden files require scan]");
+    appendLine("`-- [local index sleeping]");
   }
 
   function commandScan() {
@@ -253,19 +257,19 @@
     appendLine("scan complete:");
     appendLine("  found /Adventure-Game/");
     appendLine("  found .eggs");
-    appendLine("  found .relic");
-    appendLine([
-      "try ",
-      { type: "command", value: "cat .eggs" },
-      " or ",
-      { type: "command", value: "cat .relic" },
-      " to read the hidden files.",
-    ]);
+    appendLine("  static pocket: 777hz carrier, too faint to mount");
+    appendLine("  filesystem map refreshed");
   }
 
   function commandCat(args) {
-    const target = args.join(" ");
-    if (target !== ".eggs" && target !== ".relic") {
+    const rawTarget = args.join(" ");
+    const target = rawTarget === "static/.relic" ? ".relic" : rawTarget;
+    if (target === ".relic" && state.scanned && !state.tuned) {
+      appendLine("cat: .relic: signal not mounted");
+      return;
+    }
+
+    if (target !== ".eggs" && (target !== ".relic" || !state.tuned)) {
       appendLine(`cat: ${target || "missing file"}: no such file`);
       return;
     }
@@ -278,12 +282,9 @@
 
     if (target === ".relic") {
       appendLine(".relic");
-      appendLine("  brass bell: cold");
-      appendLine("  inscription: when the static asks, answer with three tolls");
-      appendLine([
-        "  try ",
-        { type: "command", value: "toll 3" },
-      ]);
+      appendLine("  brass bell: warm");
+      appendLine("  inscription: the third toll refuses to echo here");
+      appendLine("  route: not listed, not lost");
       return;
     }
 
@@ -296,17 +297,32 @@
     ]);
   }
 
+  function commandTune(args) {
+    const frequency = args.join("").replace(/hz$/i, "");
+    if (!state.scanned) {
+      appendLine("tune: receiver has no carrier map");
+      return;
+    }
+
+    if (frequency !== "777") {
+      appendLine("tune: clean silence");
+      return;
+    }
+
+    state.tuned = true;
+    appendLine("carrier locked: 777hz");
+    appendLine("static/ mounted with one unreadable-looking file");
+  }
+
   function commandToll(args) {
     const count = args[0];
-    if (!state.scanned) {
-      appendLine("toll: no bell found in this directory");
-      appendLine(["try ", { type: "command", value: "scan" }, " first."]);
+    if (!state.tuned) {
+      appendLine("toll: nothing nearby rings back");
       return;
     }
 
     if (count !== "3" && count !== "three") {
-      appendLine("toll: the bell answers with dull static");
-      appendLine("hint: the relic wanted three tolls");
+      appendLine("toll: one note falls flat");
       return;
     }
 
@@ -314,11 +330,10 @@
     appendLine("BONG");
     appendLine("BONG");
     appendLine("BONG");
-    appendLine("The terminal flickers into a stained-glass loading screen.");
-    appendLine([
-      "hidden command unlocked: ",
-      { type: "command", value: "holywars" },
-    ]);
+    appendLine("The prompt folds inward.");
+    window.setTimeout(() => {
+      window.location.href = HOLY_WARS_PATH;
+    }, REDIRECT_DELAY_MS);
   }
 
   function commandHolyWars() {
@@ -333,7 +348,7 @@
     }
 
     appendLine("opening Holy Wars Game...");
-    window.location.href = "/HolyWarsGame";
+    window.location.href = HOLY_WARS_PATH;
   }
 
   function commandXyzzy() {
@@ -420,6 +435,8 @@
       commandScan();
     } else if (command === "cat") {
       commandCat(args);
+    } else if (command === "tune") {
+      commandTune(args);
     } else if (command === "toll") {
       commandToll(args);
     } else if (command === "holywars" || raw.toLowerCase() === "holy wars") {
