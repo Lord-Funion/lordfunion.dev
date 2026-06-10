@@ -1,0 +1,246 @@
+:root {
+  color-scheme: dark;
+  --bg: #000;
+  --panel: #020702;
+  --line: #0b4f0b;
+  --text: #39ff14;
+  --text-soft: #1edb0d;
+  --text-dim: #168d0f;
+  --black: #000;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--bg);
+}
+
+body {
+  overflow: hidden;
+  color: var(--text);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+body.high-contrast {
+  --panel: #000;
+  --line: #39ff14;
+  --text: #c8ffc1;
+  --text-soft: #72ff68;
+  --text-dim: #4fd947;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.terminal-shell {
+  min-height: 100vh;
+  padding: clamp(10px, 3vw, 28px);
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(57, 255, 20, 0.03) 0,
+      rgba(57, 255, 20, 0.03) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    radial-gradient(circle at center, #041404 0, #000 68%);
+}
+
+.terminal-window {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  width: min(980px, 100%);
+  height: calc(100vh - clamp(20px, 6vw, 56px));
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow:
+    0 0 0 1px rgba(57, 255, 20, 0.12),
+    0 0 28px rgba(57, 255, 20, 0.14);
+}
+
+.terminal-bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text-dim);
+  background: #010401;
+}
+
+.terminal-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text);
+  box-shadow: 0 0 12px rgba(57, 255, 20, 0.75);
+}
+
+.terminal-title,
+.terminal-status {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.terminal-status {
+  color: var(--text-soft);
+}
+
+.terminal-screen {
+  position: relative;
+  min-height: 0;
+  overflow-y: auto;
+  padding: clamp(14px, 3vw, 24px);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.35);
+}
+
+.terminal-screen::after {
+  position: sticky;
+  bottom: 0;
+  display: block;
+  width: 100%;
+  height: 22px;
+  pointer-events: none;
+  content: "";
+  background: linear-gradient(transparent, var(--panel));
+}
+
+.site-logo {
+  width: 100%;
+  margin: 0 0 16px;
+  overflow-x: auto;
+  color: var(--text);
+  font-size: clamp(10px, 2vw, 15px);
+  line-height: 1.08;
+  white-space: pre;
+}
+
+.terminal-output {
+  min-height: 12rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.line {
+  min-height: 1.45em;
+}
+
+.line + .line {
+  margin-top: 2px;
+}
+
+.dim {
+  color: var(--text-dim);
+}
+
+.bright {
+  color: #afffaf;
+}
+
+.command-button,
+.terminal-link {
+  display: inline;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  padding: 0;
+  background: transparent;
+  color: #afffaf;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.command-button:hover,
+.command-button:focus-visible,
+.terminal-link:hover,
+.terminal-link:focus-visible {
+  color: var(--black);
+  background: var(--text);
+  outline: 0;
+  text-shadow: none;
+}
+
+.prompt-line {
+  display: flex;
+  gap: 0.55ch;
+  align-items: baseline;
+  margin-top: 10px;
+}
+
+.prompt-label {
+  flex: 0 0 auto;
+  color: var(--text-soft);
+}
+
+.command-input {
+  min-width: 4ch;
+  flex: 1 1 auto;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  caret-color: var(--text);
+}
+
+.command-input::selection,
+.line::selection,
+.site-logo::selection {
+  background: var(--text);
+  color: var(--black);
+  text-shadow: none;
+}
+
+.noscript-link {
+  position: fixed;
+  inset: auto 12px 12px;
+  margin: 0;
+  color: var(--text);
+  font-family: "Courier New", Courier, monospace;
+}
+
+.noscript-link a {
+  color: #afffaf;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
+  .terminal-shell {
+    padding: 0;
+  }
+
+  .terminal-window {
+    width: 100%;
+    height: 100vh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .terminal-status {
+    display: none;
+  }
+
+  .prompt-line {
+    align-items: flex-start;
+  }
+
+  .prompt-label {
+    max-width: none;
+  }
+}

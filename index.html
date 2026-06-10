@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>lordfunion.dev</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000000'/%3E%3Ctext x='8' y='40' font-size='24' font-family='monospace' fill='%2339ff14'%3E%3E_%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="terminal-shell" aria-label="lordfunion.dev terminal">
+    <section class="terminal-window">
+      <div class="terminal-bar" aria-hidden="true">
+        <span class="terminal-led"></span>
+        <span class="terminal-title">lordfunion.dev:/home</span>
+        <span class="terminal-status">ONLINE</span>
+      </div>
+
+      <div id="screen" class="terminal-screen" aria-live="polite">
+        <pre class="site-logo" aria-label="lordfunion.dev ASCII logo">
+ _               _  __             _             
+| | ___  _ __ __| |/ _|_   _ _ __ (_) ___  _ __  
+| |/ _ \| '__/ _` | |_| | | | '_ \| |/ _ \| '_ \ 
+| | (_) | | | (_| |  _| |_| | | | | | (_) | | | |
+|_|\___/|_|  \__,_|_|  \__,_|_| |_|_|\___/|_| |_|
+        </pre>
+        <div id="output" class="terminal-output"></div>
+        <form id="prompt-form" class="prompt-line" autocomplete="off">
+          <label for="command-input" class="prompt-label">visitor@lordfunion.dev:~$</label>
+          <input id="command-input" class="command-input" type="text" spellcheck="false" autocapitalize="none" autofocus>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <noscript>
+    <p class="noscript-link">
+      JavaScript is required for the terminal. Adventure Game:
+      <a href="/adventure-game/">lordfunion.dev/Adventure-Game/</a>
+    </p>
+  </noscript>
+
+  <script src="app.js"></script>
+</body>
+</html>
