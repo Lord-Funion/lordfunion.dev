@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>lordfunion.dev old web corner</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #00ff66;
+      --hot: #ff66ff;
+      --blue: #66ffff;
+      --gold: #ffff66;
+      --bg: #050014;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        repeating-linear-gradient(45deg, rgba(255, 102, 255, 0.12) 0 8px, transparent 8px 16px),
+        radial-gradient(circle at 50% 0, #22115a, var(--bg) 58%);
+      color: var(--ink);
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    a {
+      color: var(--blue);
+    }
+
+    a:visited {
+      color: var(--hot);
+    }
+
+    .page {
+      width: min(900px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 18px 0 28px;
+    }
+
+    .marquee {
+      overflow: hidden;
+      border: 3px ridge var(--hot);
+      background: #000;
+      color: var(--gold);
+      white-space: nowrap;
+    }
+
+    .marquee span {
+      display: inline-block;
+      padding: 6px 0;
+      animation: crawl 14s linear infinite;
+    }
+
+    @keyframes crawl {
+      from {
+        transform: translateX(100%);
+      }
+
+      to {
+        transform: translateX(-100%);
+      }
+    }
+
+    .box {
+      margin-top: 16px;
+      border: 4px double var(--blue);
+      background: rgba(0, 0, 0, 0.86);
+      box-shadow: 0 0 24px rgba(102, 255, 255, 0.35);
+    }
+
+    header {
+      padding: 22px 18px 12px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(2rem, 10vw, 4.5rem);
+      line-height: 0.95;
+      text-shadow: 3px 3px 0 #d000ff, 6px 6px 0 #003cff;
+    }
+
+    .blink {
+      animation: blink 1s steps(2, start) infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    nav,
+    main,
+    footer {
+      border: 2px solid var(--ink);
+      background: #020202;
+      padding: 12px;
+    }
+
+    nav a {
+      display: block;
+      margin: 0 0 10px;
+      font-weight: 700;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      color: var(--hot);
+      font-size: 1.25rem;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .badge {
+      border: 2px outset var(--gold);
+      padding: 4px 8px;
+      background: #111;
+      color: var(--gold);
+      font-size: 0.85rem;
+    }
+
+    .guestbook {
+      margin-top: 14px;
+      border-top: 1px dashed var(--ink);
+      padding-top: 12px;
+    }
+
+    footer {
+      margin: 0 16px 16px;
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="marquee">
+      <span>*** WELCOME TO THE OLD WEB CORNER *** BEST VIEWED WITH A QUESTIONABLE MODEM ***</span>
+    </div>
+
+    <div class="box">
+      <header>
+        <h1>LORDFUNION<br>OLD WEB</h1>
+        <p class="blink">UNDER CONSTRUCTION FOREVER</p>
+      </header>
+
+      <div class="content">
+        <nav aria-label="Old web navigation">
+          <a href="/">Home Terminal</a>
+          <a href="/Adventure-Game/">Adventure Game</a>
+          <a href="/HolyWarsGame">Holy Wars Game</a>
+          <a href="https://github.com/lordfunion">GitHub</a>
+        </nav>
+
+        <main>
+          <h2>Found Footage From The Tiny Internet</h2>
+          <p>
+            You found the dusty page behind the terminal. Nothing critical lives here,
+            just blinking text, suspicious borders, and the comforting hum of old links.
+          </p>
+
+          <div class="badge-row" aria-label="decorative badges">
+            <span class="badge">HTML POWERED</span>
+            <span class="badge">NO TRACKERS</span>
+            <span class="badge">WEBRING READY</span>
+            <span class="badge">404 ENERGY</span>
+          </div>
+
+          <section class="guestbook">
+            <h2>Guestbook</h2>
+            <p>visitor_001: the terminal secret sent me here.</p>
+            <p>sysop: nice. everything useful is back on the front page.</p>
+          </section>
+        </main>
+      </div>
+
+      <footer>
+        <span>Last updated: whenever the blinking text felt right.</span>
+      </footer>
+    </div>
+  </div>
+</body>
+</html>
