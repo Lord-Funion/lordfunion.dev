@@ -119,6 +119,9 @@
     if (state.unlocked.has("warp")) {
       appendLine(["  ", { type: "command", value: "warp" }, " - use the tucked-away shortcut"]);
     }
+    if (state.unlocked.has("holywars")) {
+      appendLine(["  ", { type: "command", value: "holywars" }, " - follow the bell static"]);
+    }
     blank();
     appendLine("known links:");
     appendLine([
@@ -237,7 +240,8 @@
     appendLine("|-- links");
     appendLine("|-- projects");
     if (state.scanned) {
-      appendLine("`-- .eggs");
+      appendLine("|-- .eggs");
+      appendLine("`-- .relic");
       return;
     }
 
@@ -249,23 +253,37 @@
     appendLine("scan complete:");
     appendLine("  found /Adventure-Game/");
     appendLine("  found .eggs");
+    appendLine("  found .relic");
     appendLine([
       "try ",
       { type: "command", value: "cat .eggs" },
-      " to read the hidden file.",
+      " or ",
+      { type: "command", value: "cat .relic" },
+      " to read the hidden files.",
     ]);
   }
 
   function commandCat(args) {
     const target = args.join(" ");
-    if (target !== ".eggs") {
+    if (target !== ".eggs" && target !== ".relic") {
       appendLine(`cat: ${target || "missing file"}: no such file`);
       return;
     }
 
     if (!state.scanned) {
-      appendLine("cat: .eggs: access path not indexed yet");
+      appendLine(`cat: ${target}: access path not indexed yet`);
       appendLine(["try ", { type: "command", value: "scan" }, " first."]);
+      return;
+    }
+
+    if (target === ".relic") {
+      appendLine(".relic");
+      appendLine("  brass bell: cold");
+      appendLine("  inscription: when the static asks, answer with three tolls");
+      appendLine([
+        "  try ",
+        { type: "command", value: "toll 3" },
+      ]);
       return;
     }
 
@@ -276,6 +294,46 @@
       { type: "command", value: "xyzzy" },
       " when the prompt comes back",
     ]);
+  }
+
+  function commandToll(args) {
+    const count = args[0];
+    if (!state.scanned) {
+      appendLine("toll: no bell found in this directory");
+      appendLine(["try ", { type: "command", value: "scan" }, " first."]);
+      return;
+    }
+
+    if (count !== "3" && count !== "three") {
+      appendLine("toll: the bell answers with dull static");
+      appendLine("hint: the relic wanted three tolls");
+      return;
+    }
+
+    state.unlocked.add("holywars");
+    appendLine("BONG");
+    appendLine("BONG");
+    appendLine("BONG");
+    appendLine("The terminal flickers into a stained-glass loading screen.");
+    appendLine([
+      "hidden command unlocked: ",
+      { type: "command", value: "holywars" },
+    ]);
+  }
+
+  function commandHolyWars() {
+    if (!state.unlocked.has("holywars")) {
+      appendLine("holywars: the route is sealed behind bell static");
+      appendLine([
+        "try ",
+        { type: "command", value: "scan" },
+        " and look for stranger files.",
+      ]);
+      return;
+    }
+
+    appendLine("opening Holy Wars Game...");
+    window.location.href = "/HolyWarsGame";
   }
 
   function commandXyzzy() {
@@ -362,6 +420,10 @@
       commandScan();
     } else if (command === "cat") {
       commandCat(args);
+    } else if (command === "toll") {
+      commandToll(args);
+    } else if (command === "holywars" || raw.toLowerCase() === "holy wars") {
+      commandHolyWars();
     } else if (command === "xyzzy") {
       commandXyzzy();
     } else if (command === "warp") {
