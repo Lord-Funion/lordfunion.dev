@@ -25,12 +25,6 @@
       label: "Holy Wars Game",
       description: "open the other game",
     },
-    {
-      command: "oldweb",
-      href: "/old-web/",
-      label: "Old Web Corner",
-      description: "visit the weird throwback page",
-    },
   ];
 
   const COMMANDS = {
@@ -39,7 +33,6 @@
     projects: "list public projects",
     adventure: "open Adventure Game",
     holywars: "open Holy Wars Game",
-    oldweb: "open the old web corner",
     about: "print the site file",
     contact: "show contact routes",
     status: "print terminal status",
@@ -176,11 +169,6 @@
     window.location.href = "/HolyWarsGame";
   }
 
-  function commandOldWeb() {
-    appendLine("opening Old Web Corner...");
-    window.location.href = OLD_WEB_PATH;
-  }
-
   function commandAbout() {
     appendLine("site file:");
     appendLine("  handle: lordfunion");
@@ -240,7 +228,6 @@
     appendLine(".");
     appendLine("|-- Adventure-Game/");
     appendLine("|-- HolyWarsGame");
-    appendLine("|-- old-web/");
     appendLine("`-- index.html");
   }
 
@@ -259,7 +246,7 @@
 
     if (target === ".relic") {
       appendLine(".relic");
-      appendLine("  brittle bookmark: /old-web/");
+      appendLine("  brittle bookmark: the old door still opens from old words");
       appendLine("  the page smells like table layouts and guestbooks");
       return;
     }
@@ -324,8 +311,6 @@
       commandAdventure();
     } else if (command === "holywars" || raw.toLowerCase() === "holy wars") {
       commandHolyWars();
-    } else if (command === "oldweb" || command === "old-web" || raw.toLowerCase() === "old web") {
-      commandOldWeb();
     } else if (command === "projects" || command === "project") {
       commandProjects();
     } else if (command === "about" || command === "whoami") {
