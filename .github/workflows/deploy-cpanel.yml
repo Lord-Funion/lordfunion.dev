@@ -1,0 +1,24 @@
+name: Deploy to cPanel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-cpanel
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull latest code on cPanel
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.CPANEL_SSH_KEY }}" > ~/.ssh/cpanel_key
+          chmod 600 ~/.ssh/cpanel_key
+          ssh-keyscan -p "${{ secrets.CPANEL_PORT }}" "${{ secrets.CPANEL_HOST }}" >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/cpanel_key -p "${{ secrets.CPANEL_PORT }}" "${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }}" \
+            'git -C /home/r5xegw92uu6o/public_html pull --ff-only origin main'
