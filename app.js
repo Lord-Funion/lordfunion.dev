@@ -7,6 +7,8 @@
   const WINDOWS_HOME = "C:\\Users\\visitor";
   const THEME_STORAGE_KEY = "lordfunion-theme";
   const SHELL_STORAGE_KEY = "lordfunion-shell";
+  const FILE_SYSTEM_STORAGE_KEY = "lordfunion-vfs";
+  const ENV_STORAGE_KEY = "lordfunion-env";
   const OLD_WEB_PATH = "/old-web/";
   const REDIRECT_DELAY_MS = 800;
 
@@ -92,6 +94,30 @@
     whoami: "print current user",
     hostname: "print host name",
     uname: "print system name",
+    nano: "edit a text file",
+    touch: "create files or update timestamps",
+    mkdir: "make directories",
+    rm: "remove files or directories",
+    rmdir: "remove empty directories",
+    cp: "copy files",
+    mv: "move or rename files",
+    grep: "search text files",
+    find: "walk the virtual filesystem",
+    head: "print the first lines of files",
+    tail: "print the last lines of files",
+    wc: "print newline, word, and byte counts",
+    stat: "display file status",
+    file: "determine file type",
+    chmod: "change file mode bits",
+    du: "estimate file usage",
+    df: "show virtual disk usage",
+    env: "print environment",
+    export: "set environment variables",
+    printenv: "print environment variables",
+    ps: "report virtual processes",
+    top: "display virtual process summary",
+    resetfs: "reset the saved filesystem",
+    ssh: "open a simulated ssh session",
     date: "print current date",
     clear: "clear the screen",
   };
@@ -128,16 +154,23 @@
     "email",
     "exit",
     "fortune",
+    "grep",
     "holywars",
     "la",
     "ll",
+    "more",
+    "less",
     "man",
     "mode",
+    "printf",
     "phosphor",
     "project",
+    "reset",
     "scan",
     "social",
     "socials",
+    "source",
+    "ssh",
     "sudo",
     "themes",
     "time",
@@ -188,12 +221,24 @@
     },
   };
 
-  const FILE_SYSTEM = {
+  const DEFAULT_ENV = {
+    HOME,
+    HOSTNAME: HOST,
+    LANG: "en_US.UTF-8",
+    LOGNAME: USER,
+    PATH: "/usr/local/bin:/usr/bin:/bin:/home/visitor/bin",
+    PWD: HOME,
+    SHELL: "/bin/bash",
+    TERM: "xterm-256color",
+    USER,
+  };
+
+  const DEFAULT_FILE_SYSTEM = {
     "/": { type: "dir", entries: ["home", "tmp", "var"] },
     "/home": { type: "dir", entries: ["visitor"] },
     "/home/visitor": {
       type: "dir",
-      entries: ["README.md", "contact.txt", "projects", "old-web", ".eggs", ".relic"],
+      entries: ["README.md", "contact.txt", "projects", "old-web", "bin", ".eggs", ".relic"],
     },
     "/home/visitor/README.md": {
       type: "file",
@@ -203,6 +248,8 @@
         "This is a tiny public shell for quick exits, projects, and relics.",
         "The real files are static, but the terminal keeps a working directory",
         "and enough familiar commands to feel like home.",
+        "",
+        "Try: ls -la, cd projects, cat contact.txt, nano notes.txt",
       ],
     },
     "/home/visitor/contact.txt": {
@@ -253,6 +300,7 @@
       ],
     },
     "/tmp": { type: "dir", entries: [] },
+    "/home/visitor/bin": { type: "dir", entries: [] },
     "/var": { type: "dir", entries: ["log"] },
     "/var/log": { type: "dir", entries: ["access.log"] },
     "/var/log/access.log": {
@@ -264,6 +312,9 @@
       ],
     },
   };
+
+  let fileSystem = null;
+  let shellEnv = null;
 
   const FORTUNES = [
     "Ship the odd little thing. The useful part often follows.",
@@ -321,6 +372,82 @@
 
   function blank() {
     appendLine("");
+  }
+
+  function cloneData(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function mergeSeedFileSystem(savedFileSystem) {
+    const merged = { ...cloneData(DEFAULT_FILE_SYSTEM), ...savedFileSystem };
+
+    for (const [path, node] of Object.entries(DEFAULT_FILE_SYSTEM)) {
+      if (!savedFileSystem[path]) {
+        merged[path] = cloneData(node);
+      } else if (node.type === "dir" && Array.isArray(node.entries)) {
+        const savedEntries = Array.isArray(savedFileSystem[path].entries) ? savedFileSystem[path].entries : [];
+        merged[path].entries = [...new Set([...savedEntries, ...node.entries])].sort((left, right) => left.localeCompare(right));
+      }
+    }
+
+    return merged;
+  }
+
+  function loadFileSystem() {
+    try {
+      const stored = window.localStorage.getItem(FILE_SYSTEM_STORAGE_KEY);
+      if (!stored) {
+        return cloneData(DEFAULT_FILE_SYSTEM);
+      }
+
+      const parsed = JSON.parse(stored);
+      if (!parsed || typeof parsed !== "object" || !parsed["/"] || !parsed[HOME]) {
+        return cloneData(DEFAULT_FILE_SYSTEM);
+      }
+
+      return mergeSeedFileSystem(parsed);
+    } catch {
+      return cloneData(DEFAULT_FILE_SYSTEM);
+    }
+  }
+
+  function saveFileSystem() {
+    try {
+      window.localStorage.setItem(FILE_SYSTEM_STORAGE_KEY, JSON.stringify(fileSystem));
+    } catch {
+      appendLine("bash: warning: localStorage is full or unavailable; filesystem changes may not persist");
+    }
+  }
+
+  function resetFileSystem() {
+    fileSystem = cloneData(DEFAULT_FILE_SYSTEM);
+    saveFileSystem();
+  }
+
+  function loadEnvironment() {
+    try {
+      const stored = window.localStorage.getItem(ENV_STORAGE_KEY);
+      if (!stored) {
+        return { ...DEFAULT_ENV };
+      }
+
+      const parsed = JSON.parse(stored);
+      if (!parsed || typeof parsed !== "object") {
+        return { ...DEFAULT_ENV };
+      }
+
+      return { ...DEFAULT_ENV, ...parsed, PWD: state.cwd };
+    } catch {
+      return { ...DEFAULT_ENV };
+    }
+  }
+
+  function saveEnvironment() {
+    try {
+      window.localStorage.setItem(ENV_STORAGE_KEY, JSON.stringify(shellEnv));
+    } catch {
+      appendLine("bash: warning: localStorage is full or unavailable; environment changes may not persist");
+    }
   }
 
   function isWindowsMode() {
@@ -518,7 +645,17 @@
   }
 
   function getNode(path) {
-    return FILE_SYSTEM[path] || null;
+    return fileSystem[path] || null;
+  }
+
+  function setNode(path, node) {
+    fileSystem[path] = node;
+    saveFileSystem();
+  }
+
+  function deleteNode(path) {
+    delete fileSystem[path];
+    saveFileSystem();
   }
 
   function childPath(parentPath, childName) {
@@ -529,7 +666,155 @@
     return path === "/" ? "/" : path.split("/").pop();
   }
 
+  function getDirname(path) {
+    if (path === "/") {
+      return "/";
+    }
+
+    const parts = path.split("/");
+    parts.pop();
+    return parts.join("/") || "/";
+  }
+
+  function isDescendant(parentPath, candidatePath) {
+    return candidatePath !== parentPath && candidatePath.startsWith(`${parentPath}/`);
+  }
+
+  function getContentLines(node) {
+    if (!node || node.type !== "file") {
+      return [];
+    }
+
+    if (Array.isArray(node.content)) {
+      return node.content;
+    }
+
+    return String(node.content || "").split("\n");
+  }
+
+  function setFileContent(path, content) {
+    const node = getNode(path);
+    const lines = Array.isArray(content) ? content : String(content).split("\n");
+
+    if (node && node.type === "file") {
+      node.content = lines;
+      node.modified = Date.now();
+      setNode(path, node);
+      return;
+    }
+
+    setNode(path, {
+      type: "file",
+      content: lines,
+      mode: "-rw-r--r--",
+      created: Date.now(),
+      modified: Date.now(),
+    });
+  }
+
+  function addDirectoryEntry(parentPath, name) {
+    const parent = getNode(parentPath);
+    if (!parent || parent.type !== "dir") {
+      return;
+    }
+
+    if (!parent.entries.includes(name)) {
+      parent.entries.push(name);
+      parent.entries.sort((left, right) => left.localeCompare(right));
+      parent.modified = Date.now();
+      setNode(parentPath, parent);
+    }
+  }
+
+  function removeDirectoryEntry(parentPath, name) {
+    const parent = getNode(parentPath);
+    if (!parent || parent.type !== "dir") {
+      return;
+    }
+
+    parent.entries = parent.entries.filter((entry) => entry !== name);
+    parent.modified = Date.now();
+    setNode(parentPath, parent);
+  }
+
+  function canWritePath(path) {
+    return path !== "/" && path !== "/home" && path !== HOME;
+  }
+
+  function ensureParentDirectory(path, commandName) {
+    const parentPath = getDirname(path);
+    const parent = getNode(parentPath);
+
+    if (!parent) {
+      appendLine(`${commandName}: cannot create '${path}': No such file or directory`);
+      return null;
+    }
+
+    if (parent.type !== "dir") {
+      appendLine(`${commandName}: cannot create '${path}': Not a directory`);
+      return null;
+    }
+
+    return parentPath;
+  }
+
+  function ensureFilePath(path, commandName) {
+    const existingNode = getNode(path);
+    if (existingNode && existingNode.type === "dir") {
+      appendLine(`${commandName}: cannot overwrite directory '${path}'`);
+      return null;
+    }
+
+    return ensureParentDirectory(path, commandName);
+  }
+
+  function listPathsUnder(path) {
+    return Object.keys(fileSystem)
+      .filter((candidatePath) => candidatePath === path || isDescendant(path, candidatePath))
+      .sort((left, right) => right.length - left.length);
+  }
+
+  function copyNodeTree(sourcePath, destinationPath) {
+    const paths = listPathsUnder(sourcePath).sort((left, right) => left.length - right.length);
+
+    for (const source of paths) {
+      const relative = source === sourcePath ? "" : source.slice(sourcePath.length);
+      const destination = `${destinationPath}${relative}`;
+      fileSystem[destination] = cloneData(fileSystem[source]);
+      fileSystem[destination].modified = Date.now();
+    }
+
+    saveFileSystem();
+  }
+
+  function removeNodeTree(path) {
+    for (const candidatePath of listPathsUnder(path)) {
+      delete fileSystem[candidatePath];
+    }
+
+    saveFileSystem();
+  }
+
+  function getAllDescendantFiles(rootPath) {
+    return Object.keys(fileSystem)
+      .filter((path) => (path === rootPath || isDescendant(rootPath, path)) && getNode(path).type === "file")
+      .sort();
+  }
+
+  function updatePwd() {
+    if (!shellEnv) {
+      return;
+    }
+
+    shellEnv.PWD = state.cwd;
+    saveEnvironment();
+  }
+
   function getFileSize(node) {
+    if (!node) {
+      return 0;
+    }
+
     if (node.type === "dir") {
       return 4096;
     }
@@ -538,10 +823,18 @@
       return node.href.length;
     }
 
-    return node.content.join("\n").length;
+    return getContentLines(node).join("\n").length;
   }
 
   function getMode(node) {
+    if (!node) {
+      return "??????????";
+    }
+
+    if (node.mode) {
+      return node.mode;
+    }
+
     if (node.type === "dir") {
       return "drwxr-xr-x";
     }
@@ -572,6 +865,17 @@
     return entryName;
   }
 
+  function formatUnixDate(timestamp) {
+    const date = timestamp ? new Date(timestamp) : new Date("2026-06-11T15:42:00");
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).replace(",", "");
+  }
+
   function formatLongEntry(parentPath, entryName) {
     const path = childPath(parentPath, entryName);
     const node = getNode(path);
@@ -579,7 +883,7 @@
     const displayName = formatEntry(parentPath, entryName);
     const target = node.type === "link" ? ` -> ${node.href}` : "";
 
-    return `${getMode(node)} 1 ${USER} web ${size} Jun 11  ${displayName}${target}`;
+    return `${getMode(node)} 1 ${USER} web ${size} ${formatUnixDate(node.modified)} ${displayName}${target}`;
   }
 
   function formatWindowsEntry(parentPath, entryName) {
@@ -687,6 +991,73 @@
     }
 
     return { args, error: "" };
+  }
+
+  function splitRedirect(args) {
+    const nextArgs = [];
+    let redirect = null;
+
+    for (let index = 0; index < args.length; index += 1) {
+      const arg = args[index];
+
+      if (arg === ">" || arg === ">>") {
+        const target = args[index + 1];
+        if (!target) {
+          return { args: nextArgs, redirect: null, error: `syntax error near unexpected token '${arg}'` };
+        }
+
+        redirect = { append: arg === ">>", target };
+        index += 1;
+        continue;
+      }
+
+      if (arg.startsWith(">>") && arg.length > 2) {
+        redirect = { append: true, target: arg.slice(2) };
+        continue;
+      }
+
+      if (arg.startsWith(">") && arg.length > 1) {
+        redirect = { append: false, target: arg.slice(1) };
+        continue;
+      }
+
+      nextArgs.push(arg);
+    }
+
+    return { args: nextArgs, redirect, error: "" };
+  }
+
+  function writeRedirect(redirect, lines, commandName) {
+    const targetPath = resolvePath(redirect.target);
+    const existingNode = getNode(targetPath);
+
+    if (existingNode && existingNode.type === "dir") {
+      appendLine(`${commandName}: ${redirect.target}: Is a directory`);
+      return false;
+    }
+
+    const parentPath = ensureParentDirectory(targetPath, commandName);
+    if (!parentPath) {
+      return false;
+    }
+
+    const previous = redirect.append && existingNode ? getContentLines(existingNode) : [];
+    setFileContent(targetPath, [...previous, ...lines].join("\n"));
+    addDirectoryEntry(parentPath, getBasename(targetPath));
+    return true;
+  }
+
+  function emitLines(lines, redirect = null, commandName = "bash") {
+    const outputLines = Array.isArray(lines) ? lines : [String(lines)];
+
+    if (redirect) {
+      writeRedirect(redirect, outputLines, commandName);
+      return;
+    }
+
+    for (const line of outputLines) {
+      appendLine(line);
+    }
   }
 
   function printCommandList(commands) {
@@ -873,9 +1244,10 @@
     appendLine(`theme set: ${theme.label}`);
   }
 
-  function commandLs(args) {
+  function commandLs(args, redirect = null) {
     const options = { all: false, long: false };
     const paths = [];
+    const lines = [];
 
     for (const arg of args) {
       if (arg.startsWith("-") && arg.length > 1) {
@@ -893,18 +1265,18 @@
 
       if (targets.length > 1) {
         if (index > 0) {
-          blank();
+          lines.push("");
         }
-        appendLine(`${target || displayPath(state.cwd)}:`);
+        lines.push(`${target || displayPath(state.cwd)}:`);
       }
 
       if (!node) {
-        appendLine(`ls: cannot access '${target}': No such file or directory`);
+        lines.push(`ls: cannot access '${target}': No such file or directory`);
         continue;
       }
 
       if (node.type !== "dir") {
-        appendLine(getBasename(path));
+        lines.push(getBasename(path));
         continue;
       }
 
@@ -915,13 +1287,15 @@
 
       if (options.long) {
         for (const entry of entries) {
-          appendLine(formatLongEntry(path, entry));
+          lines.push(formatLongEntry(path, entry));
         }
         continue;
       }
 
-      appendLine(entries.map((entry) => formatEntry(path, entry)).join("  "));
+      lines.push(entries.map((entry) => formatEntry(path, entry)).join("  "));
     }
+
+    emitLines(lines, redirect, "ls");
   }
 
   function commandDir(args) {
@@ -983,14 +1357,17 @@
 
     state.previousCwd = state.cwd;
     state.cwd = path;
+    updatePwd();
     updatePrompt();
   }
 
-  function commandPwd() {
-    appendLine(state.cwd);
+  function commandPwd(redirect = null) {
+    emitLines([state.cwd], redirect, "pwd");
   }
 
-  function commandCat(args) {
+  function commandCat(args, redirect = null) {
+    const lines = [];
+
     if (!args.length) {
       appendLine("cat: missing operand");
       return;
@@ -1002,24 +1379,738 @@
       const node = getNode(path);
 
       if (!node) {
-        appendLine(`cat: ${target}: No such file or directory`);
+        lines.push(`cat: ${target}: No such file or directory`);
         continue;
       }
 
       if (node.type === "dir") {
-        appendLine(`cat: ${target}: Is a directory`);
+        lines.push(`cat: ${target}: Is a directory`);
         continue;
       }
 
       if (node.type === "link") {
-        appendLine(`${getBasename(path)} -> ${node.href}`);
+        lines.push(`${getBasename(path)} -> ${node.href}`);
         continue;
       }
 
-      for (const line of node.content) {
-        appendLine(line);
+      lines.push(...getContentLines(node));
+    }
+
+    emitLines(lines, redirect, "cat");
+  }
+
+  function commandEcho(args, redirect = null) {
+    emitLines([args.join(" ")], redirect, "echo");
+  }
+
+  function commandPrintf(args, redirect = null) {
+    const outputText = args.join(" ")
+      .replaceAll("\\n", "\n")
+      .replaceAll("\\t", "\t");
+    emitLines(outputText.split("\n"), redirect, "printf");
+  }
+
+  function commandTouch(args) {
+    if (!args.length) {
+      appendLine("touch: missing file operand");
+      return;
+    }
+
+    for (const target of args) {
+      const path = resolvePath(target);
+      const existingNode = getNode(path);
+
+      if (existingNode && existingNode.type === "dir") {
+        existingNode.modified = Date.now();
+        setNode(path, existingNode);
+        continue;
+      }
+
+      const parentPath = ensureFilePath(path, "touch");
+      if (!parentPath) {
+        continue;
+      }
+
+      if (existingNode) {
+        existingNode.modified = Date.now();
+        setNode(path, existingNode);
+      } else {
+        setFileContent(path, "");
+        addDirectoryEntry(parentPath, getBasename(path));
       }
     }
+  }
+
+  function commandMkdir(args) {
+    const parents = args.includes("-p");
+    const targets = args.filter((arg) => arg !== "-p");
+
+    if (!targets.length) {
+      appendLine("mkdir: missing operand");
+      return;
+    }
+
+    for (const target of targets) {
+      const path = resolvePath(target);
+
+      if (getNode(path)) {
+        appendLine(`mkdir: cannot create directory '${target}': File exists`);
+        continue;
+      }
+
+      const segments = path.split("/").filter(Boolean);
+      let currentPath = "";
+      let failed = false;
+
+      for (const segment of segments) {
+        const parentPath = currentPath || "/";
+        currentPath = currentPath ? `${currentPath}/${segment}` : `/${segment}`;
+        const existingNode = getNode(currentPath);
+
+        if (existingNode) {
+          if (existingNode.type !== "dir") {
+            appendLine(`mkdir: cannot create directory '${target}': Not a directory`);
+            failed = true;
+            break;
+          }
+          continue;
+        }
+
+        if (!parents && currentPath !== path) {
+          appendLine(`mkdir: cannot create directory '${target}': No such file or directory`);
+          failed = true;
+          break;
+        }
+
+        setNode(currentPath, {
+          type: "dir",
+          entries: [],
+          mode: "drwxr-xr-x",
+          created: Date.now(),
+          modified: Date.now(),
+        });
+        addDirectoryEntry(parentPath, segment);
+      }
+
+      if (failed) {
+        continue;
+      }
+    }
+  }
+
+  function commandRm(args) {
+    const recursive = args.includes("-r") || args.includes("-R") || args.includes("-rf") || args.includes("-fr");
+    const force = args.includes("-f") || args.includes("-rf") || args.includes("-fr");
+    const targets = args.filter((arg) => !arg.startsWith("-"));
+
+    if (!targets.length) {
+      appendLine("rm: missing operand");
+      return;
+    }
+
+    for (const target of targets) {
+      const path = resolvePath(target);
+      const node = getNode(path);
+
+      if (!node) {
+        if (!force) {
+          appendLine(`rm: cannot remove '${target}': No such file or directory`);
+        }
+        continue;
+      }
+
+      if (!canWritePath(path)) {
+        appendLine(`rm: cannot remove '${target}': Permission denied`);
+        continue;
+      }
+
+      if (node.type === "dir" && !recursive) {
+        appendLine(`rm: cannot remove '${target}': Is a directory`);
+        continue;
+      }
+
+      removeNodeTree(path);
+      removeDirectoryEntry(getDirname(path), getBasename(path));
+
+      if (state.cwd === path || isDescendant(path, state.cwd)) {
+        state.cwd = HOME;
+        updatePwd();
+        updatePrompt();
+      }
+    }
+  }
+
+  function commandRmdir(args) {
+    if (!args.length) {
+      appendLine("rmdir: missing operand");
+      return;
+    }
+
+    for (const target of args) {
+      const path = resolvePath(target);
+      const node = getNode(path);
+
+      if (!node) {
+        appendLine(`rmdir: failed to remove '${target}': No such file or directory`);
+        continue;
+      }
+
+      if (node.type !== "dir") {
+        appendLine(`rmdir: failed to remove '${target}': Not a directory`);
+        continue;
+      }
+
+      if (!canWritePath(path)) {
+        appendLine(`rmdir: failed to remove '${target}': Permission denied`);
+        continue;
+      }
+
+      if (node.entries.length) {
+        appendLine(`rmdir: failed to remove '${target}': Directory not empty`);
+        continue;
+      }
+
+      deleteNode(path);
+      removeDirectoryEntry(getDirname(path), getBasename(path));
+    }
+  }
+
+  function commandCp(args) {
+    const recursive = args.includes("-r") || args.includes("-R") || args.includes("-a");
+    const operands = args.filter((arg) => !arg.startsWith("-"));
+
+    if (operands.length < 2) {
+      appendLine("cp: missing destination file operand");
+      return;
+    }
+
+    const destinationRaw = operands[operands.length - 1];
+    const sourceRaws = operands.slice(0, -1);
+    const destinationPath = resolvePath(destinationRaw);
+    const destinationNode = getNode(destinationPath);
+
+    if (sourceRaws.length > 1 && (!destinationNode || destinationNode.type !== "dir")) {
+      appendLine(`cp: target '${destinationRaw}' is not a directory`);
+      return;
+    }
+
+    for (const sourceRaw of sourceRaws) {
+      const sourcePath = resolvePath(sourceRaw);
+      const sourceNode = getNode(sourcePath);
+
+      if (!sourceNode) {
+        appendLine(`cp: cannot stat '${sourceRaw}': No such file or directory`);
+        continue;
+      }
+
+      const finalDestinationPath = destinationNode && destinationNode.type === "dir"
+        ? childPath(destinationPath, getBasename(sourcePath))
+        : destinationPath;
+
+      if (sourceNode.type === "dir" && !recursive) {
+        appendLine(`cp: -r not specified; omitting directory '${sourceRaw}'`);
+        continue;
+      }
+
+      const parentPath = ensureParentDirectory(finalDestinationPath, "cp");
+      if (!parentPath) {
+        continue;
+      }
+
+      if (sourceNode.type === "dir") {
+        copyNodeTree(sourcePath, finalDestinationPath);
+      } else {
+        fileSystem[finalDestinationPath] = cloneData(sourceNode);
+        fileSystem[finalDestinationPath].modified = Date.now();
+        saveFileSystem();
+      }
+      addDirectoryEntry(parentPath, getBasename(finalDestinationPath));
+    }
+  }
+
+  function commandMv(args) {
+    if (args.length < 2) {
+      appendLine("mv: missing destination file operand");
+      return;
+    }
+
+    const destinationRaw = args[args.length - 1];
+    const sourceRaws = args.slice(0, -1);
+    const destinationPath = resolvePath(destinationRaw);
+    const destinationNode = getNode(destinationPath);
+
+    if (sourceRaws.length > 1 && (!destinationNode || destinationNode.type !== "dir")) {
+      appendLine(`mv: target '${destinationRaw}' is not a directory`);
+      return;
+    }
+
+    for (const sourceRaw of sourceRaws) {
+      const sourcePath = resolvePath(sourceRaw);
+      const sourceNode = getNode(sourcePath);
+
+      if (!sourceNode) {
+        appendLine(`mv: cannot stat '${sourceRaw}': No such file or directory`);
+        continue;
+      }
+
+      if (!canWritePath(sourcePath)) {
+        appendLine(`mv: cannot move '${sourceRaw}': Permission denied`);
+        continue;
+      }
+
+      const finalDestinationPath = destinationNode && destinationNode.type === "dir"
+        ? childPath(destinationPath, getBasename(sourcePath))
+        : destinationPath;
+      const parentPath = ensureParentDirectory(finalDestinationPath, "mv");
+      if (!parentPath) {
+        continue;
+      }
+
+      copyNodeTree(sourcePath, finalDestinationPath);
+      addDirectoryEntry(parentPath, getBasename(finalDestinationPath));
+      removeNodeTree(sourcePath);
+      removeDirectoryEntry(getDirname(sourcePath), getBasename(sourcePath));
+
+      if (state.cwd === sourcePath || isDescendant(sourcePath, state.cwd)) {
+        state.cwd = finalDestinationPath;
+        updatePwd();
+        updatePrompt();
+      }
+    }
+  }
+
+  function commandGrep(args, redirect = null) {
+    const flags = args.filter((arg) => arg.startsWith("-"));
+    const operands = args.filter((arg) => !arg.startsWith("-"));
+    const lines = [];
+    const ignoreCase = flags.some((flag) => flag.includes("i"));
+    const showLineNumbers = flags.some((flag) => flag.includes("n"));
+    const recursive = flags.some((flag) => flag.includes("r") || flag.includes("R"));
+
+    if (operands.length < 1) {
+      appendLine("grep: missing pattern");
+      return;
+    }
+
+    const pattern = operands[0];
+    const targets = operands.slice(1).length ? operands.slice(1) : ["."];
+    const needle = ignoreCase ? pattern.toLowerCase() : pattern;
+
+    for (const target of targets) {
+      const targetPath = resolvePath(target);
+      const node = getNode(targetPath);
+      if (!node) {
+        lines.push(`grep: ${target}: No such file or directory`);
+        continue;
+      }
+
+      const filePaths = node.type === "dir"
+        ? (recursive ? getAllDescendantFiles(targetPath) : [])
+        : [targetPath];
+
+      if (node.type === "dir" && !recursive) {
+        lines.push(`grep: ${target}: Is a directory`);
+        continue;
+      }
+
+      for (const filePath of filePaths) {
+        const fileNode = getNode(filePath);
+        getContentLines(fileNode).forEach((line, index) => {
+          const haystack = ignoreCase ? line.toLowerCase() : line;
+          if (!haystack.includes(needle)) {
+            return;
+          }
+
+          const prefix = filePaths.length > 1 ? `${filePath}:` : "";
+          const linePrefix = showLineNumbers ? `${index + 1}:` : "";
+          lines.push(`${prefix}${linePrefix}${line}`);
+        });
+      }
+    }
+
+    emitLines(lines, redirect, "grep");
+  }
+
+  function commandFind(args, redirect = null) {
+    const rootArg = args.find((arg) => !arg.startsWith("-")) || ".";
+    const rootPath = resolvePath(rootArg);
+    const node = getNode(rootPath);
+
+    if (!node) {
+      appendLine(`find: '${rootArg}': No such file or directory`);
+      return;
+    }
+
+    const lines = Object.keys(fileSystem)
+      .filter((path) => path === rootPath || isDescendant(rootPath, path))
+      .sort()
+      .map((path) => path === state.cwd ? "." : displayPath(path));
+
+    emitLines(lines, redirect, "find");
+  }
+
+  function readFileOperands(args, commandName) {
+    const files = [];
+    for (const target of args) {
+      const path = resolvePath(target);
+      const node = getNode(path);
+
+      if (!node) {
+        appendLine(`${commandName}: cannot open '${target}' for reading: No such file or directory`);
+        continue;
+      }
+
+      if (node.type === "dir") {
+        appendLine(`${commandName}: error reading '${target}': Is a directory`);
+        continue;
+      }
+
+      files.push({ path, target, lines: getContentLines(node) });
+    }
+
+    return files;
+  }
+
+  function commandHead(args, redirect = null) {
+    let count = 10;
+    const targets = [];
+
+    for (let index = 0; index < args.length; index += 1) {
+      if (args[index] === "-n" && args[index + 1]) {
+        count = Number.parseInt(args[index + 1], 10) || count;
+        index += 1;
+      } else {
+        targets.push(args[index]);
+      }
+    }
+
+    const files = readFileOperands(targets, "head");
+    const lines = [];
+    for (const file of files) {
+      if (files.length > 1) {
+        lines.push(`==> ${file.target} <==`);
+      }
+      lines.push(...file.lines.slice(0, count));
+    }
+
+    emitLines(lines, redirect, "head");
+  }
+
+  function commandTail(args, redirect = null) {
+    let count = 10;
+    const targets = [];
+
+    for (let index = 0; index < args.length; index += 1) {
+      if (args[index] === "-n" && args[index + 1]) {
+        count = Number.parseInt(args[index + 1], 10) || count;
+        index += 1;
+      } else {
+        targets.push(args[index]);
+      }
+    }
+
+    const files = readFileOperands(targets, "tail");
+    const lines = [];
+    for (const file of files) {
+      if (files.length > 1) {
+        lines.push(`==> ${file.target} <==`);
+      }
+      lines.push(...file.lines.slice(-count));
+    }
+
+    emitLines(lines, redirect, "tail");
+  }
+
+  function commandWc(args, redirect = null) {
+    const targets = args.length ? args : ["."];
+    const lines = [];
+
+    for (const target of targets) {
+      const path = resolvePath(target);
+      const node = getNode(path);
+
+      if (!node || node.type !== "file") {
+        lines.push(`wc: ${target}: ${node ? "Is a directory" : "No such file or directory"}`);
+        continue;
+      }
+
+      const content = getContentLines(node).join("\n");
+      const lineCount = getContentLines(node).length;
+      const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+      const byteCount = content.length;
+      lines.push(`${String(lineCount).padStart(7, " ")} ${String(wordCount).padStart(7, " ")} ${String(byteCount).padStart(7, " ")} ${target}`);
+    }
+
+    emitLines(lines, redirect, "wc");
+  }
+
+  function commandStat(args) {
+    if (!args.length) {
+      appendLine("stat: missing operand");
+      return;
+    }
+
+    for (const target of args) {
+      const path = resolvePath(target);
+      const node = getNode(path);
+
+      if (!node) {
+        appendLine(`stat: cannot statx '${target}': No such file or directory`);
+        continue;
+      }
+
+      appendLine(`  File: ${target}`);
+      appendLine(`  Size: ${getFileSize(node)}\tBlocks: 1\tIO Block: 4096 ${node.type}`);
+      appendLine(`Access: (${getMode(node)})  Uid: ( 1000/${USER})   Gid: ( 1000/web)`);
+      appendLine(`Modify: ${new Date(node.modified || Date.now()).toISOString()}`);
+    }
+  }
+
+  function commandFile(args, redirect = null) {
+    const lines = [];
+    if (!args.length) {
+      appendLine("file: missing operand");
+      return;
+    }
+
+    for (const target of args) {
+      const path = resolvePath(target);
+      const node = getNode(path);
+      if (!node) {
+        lines.push(`${target}: cannot open '${target}' (No such file or directory)`);
+      } else if (node.type === "dir") {
+        lines.push(`${target}: directory`);
+      } else if (node.type === "link") {
+        lines.push(`${target}: symbolic link to ${node.href}`);
+      } else {
+        lines.push(`${target}: ASCII text`);
+      }
+    }
+
+    emitLines(lines, redirect, "file");
+  }
+
+  function commandChmod(args) {
+    if (args.length < 2) {
+      appendLine("chmod: missing operand");
+      return;
+    }
+
+    const modeArg = args[0];
+    for (const target of args.slice(1)) {
+      const path = resolvePath(target);
+      const node = getNode(path);
+
+      if (!node) {
+        appendLine(`chmod: cannot access '${target}': No such file or directory`);
+        continue;
+      }
+
+      if (/^[0-7]{3,4}$/.test(modeArg)) {
+        const bits = modeArg.slice(-3);
+        const typeChar = node.type === "dir" ? "d" : node.type === "link" ? "l" : "-";
+        const rwx = [...bits].map((digit) => {
+          const value = Number.parseInt(digit, 8);
+          return `${value & 4 ? "r" : "-"}${value & 2 ? "w" : "-"}${value & 1 ? "x" : "-"}`;
+        }).join("");
+        node.mode = `${typeChar}${rwx}`;
+        node.modified = Date.now();
+        setNode(path, node);
+      } else {
+        appendLine(`chmod: invalid mode: '${modeArg}'`);
+      }
+    }
+  }
+
+  function commandDu(args, redirect = null) {
+    const targets = args.filter((arg) => !arg.startsWith("-"));
+    const paths = targets.length ? targets : ["."];
+    const lines = [];
+
+    for (const target of paths) {
+      const path = resolvePath(target);
+      const node = getNode(path);
+      if (!node) {
+        lines.push(`du: cannot access '${target}': No such file or directory`);
+        continue;
+      }
+
+      const size = node.type === "dir"
+        ? getAllDescendantFiles(path).reduce((sum, filePath) => sum + getFileSize(getNode(filePath)), 0)
+        : getFileSize(node);
+      lines.push(`${Math.max(1, Math.ceil(size / 1024))}\t${target}`);
+    }
+
+    emitLines(lines, redirect, "du");
+  }
+
+  function commandDf(redirect = null) {
+    const bytes = JSON.stringify(fileSystem).length;
+    const used = Math.max(1, Math.ceil(bytes / 1024));
+    emitLines([
+      "Filesystem     1K-blocks  Used Available Use% Mounted on",
+      `localStorage       5120 ${String(used).padStart(5, " ")} ${String(5120 - used).padStart(9, " ")}   ${Math.min(99, Math.ceil((used / 5120) * 100))}% /`,
+    ], redirect, "df");
+  }
+
+  function commandEnv(args, redirect = null) {
+    const lines = Object.keys(shellEnv)
+      .sort()
+      .map((key) => `${key}=${shellEnv[key]}`);
+    emitLines(lines, redirect, "env");
+  }
+
+  function commandPrintenv(args, redirect = null) {
+    if (!args.length) {
+      commandEnv([], redirect);
+      return;
+    }
+
+    emitLines(args.map((key) => shellEnv[key]).filter((value) => value !== undefined), redirect, "printenv");
+  }
+
+  function commandExport(args) {
+    if (!args.length) {
+      Object.keys(shellEnv).sort().forEach((key) => {
+        appendLine(`declare -x ${key}="${shellEnv[key]}"`);
+      });
+      return;
+    }
+
+    for (const assignment of args) {
+      const [key, ...valueParts] = assignment.split("=");
+      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) {
+        appendLine(`bash: export: '${assignment}': not a valid identifier`);
+        continue;
+      }
+
+      shellEnv[key] = valueParts.length ? valueParts.join("=") : "";
+    }
+    saveEnvironment();
+  }
+
+  function commandPs(redirect = null) {
+    emitLines([
+      "  PID TTY          TIME CMD",
+      "    1 pts/0    00:00:00 lordsh",
+      "   42 pts/0    00:00:00 renderer",
+      "  128 pts/0    00:00:00 bash",
+    ], redirect, "ps");
+  }
+
+  function commandTop() {
+    appendLine("top - localStorage Linux shell");
+    appendLine("Tasks: 3 total, 1 running, 2 sleeping");
+    appendLine("%Cpu(s): 0.7 us, 0.2 sy, 99.1 id");
+    appendLine("MiB Mem : browser-managed");
+    commandPs();
+  }
+
+  function commandSsh(args) {
+    if (!args.length) {
+      appendLine("usage: ssh [-p port] [user@]host");
+      return;
+    }
+
+    let port = "22";
+    const operands = [];
+    for (let index = 0; index < args.length; index += 1) {
+      if (args[index] === "-p" && args[index + 1]) {
+        port = args[index + 1];
+        index += 1;
+      } else {
+        operands.push(args[index]);
+      }
+    }
+
+    const destination = operands[operands.length - 1];
+    if (!destination) {
+      appendLine("usage: ssh [-p port] [user@]host");
+      return;
+    }
+
+    const [remoteUser, remoteHost] = destination.includes("@")
+      ? destination.split("@")
+      : [USER, destination];
+
+    appendLine(`OpenSSH_9.6p1, LibreSSL 3.3.6`);
+    appendLine(`Connecting to ${remoteHost} port ${port}.`);
+    appendLine(`Pseudo-terminal will not be allocated because this is a browser sandbox.`);
+    appendLine(`${remoteUser}@${remoteHost}: Permission denied (publickey).`);
+    appendLine("ssh: real network SSH is unavailable from static JavaScript; use your local terminal for live sessions.");
+  }
+
+  function commandResetFs() {
+    resetFileSystem();
+    state.cwd = HOME;
+    updatePwd();
+    updatePrompt();
+    appendLine("filesystem reset");
+  }
+
+  function closeNano(editor) {
+    editor.remove();
+    input.disabled = false;
+    input.focus();
+  }
+
+  function commandNano(args) {
+    const target = args[0] || "untitled.txt";
+    const path = resolvePath(target);
+    const existingNode = getNode(path);
+
+    if (existingNode && existingNode.type === "dir") {
+      appendLine(`nano: ${target}: Is a directory`);
+      return;
+    }
+
+    const parentPath = ensureFilePath(path, "nano");
+    if (!parentPath) {
+      return;
+    }
+
+    const editor = document.createElement("div");
+    editor.className = "nano-editor";
+    editor.innerHTML = `
+      <div class="nano-title">GNU nano 8.0<span>${displayPath(path)}</span></div>
+      <textarea class="nano-textarea" spellcheck="false"></textarea>
+      <div class="nano-bar">
+        <button type="button" data-action="save">^S Save</button>
+        <button type="button" data-action="close">^X Exit</button>
+      </div>
+    `;
+
+    const textarea = editor.querySelector(".nano-textarea");
+    textarea.value = existingNode ? getContentLines(existingNode).join("\n") : "";
+
+    const save = () => {
+      setFileContent(path, textarea.value);
+      addDirectoryEntry(parentPath, getBasename(path));
+      appendLine(`[ wrote ${textarea.value.length} bytes to ${displayPath(path)} ]`);
+    };
+
+    editor.addEventListener("click", (event) => {
+      const action = event.target.dataset.action;
+      if (action === "save") {
+        save();
+      } else if (action === "close") {
+        closeNano(editor);
+      }
+    });
+
+    textarea.addEventListener("keydown", (event) => {
+      if (event.ctrlKey && event.key.toLowerCase() === "s") {
+        event.preventDefault();
+        save();
+      } else if (event.ctrlKey && event.key.toLowerCase() === "x") {
+        event.preventDefault();
+        closeNano(editor);
+      }
+    });
+
+    document.body.append(editor);
+    input.disabled = true;
+    textarea.focus();
   }
 
   function commandType(args) {
@@ -1047,7 +2138,7 @@
         continue;
       }
 
-      for (const line of node.content) {
+      for (const line of getContentLines(node)) {
         appendLine(line);
       }
     }
@@ -1274,29 +2365,36 @@
     }
 
     const command = rawCommandName.toLowerCase();
+    const redirected = splitRedirect(args);
+    if (redirected.error) {
+      appendLine(`bash: ${redirected.error}`);
+      return;
+    }
+    const commandArgs = redirected.args;
+    const redirect = redirected.redirect;
 
     if (command === "help" || command === "?") {
       commandHelp();
     } else if (command === "links") {
       commandLinks();
     } else if (command === "ls" || (!isWindowsMode() && command === "dir")) {
-      commandLs(args);
+      commandLs(commandArgs, redirect);
     } else if (isWindowsMode() && command === "dir") {
-      commandDir(args);
+      commandDir(commandArgs);
     } else if (command === "ll") {
-      commandLs(["-l", ...args]);
+      commandLs(["-l", ...commandArgs], redirect);
     } else if (command === "la") {
-      commandLs(["-la", ...args]);
+      commandLs(["-la", ...commandArgs], redirect);
     } else if (command === "cd" || command === "chdir") {
-      commandCd(args);
+      commandCd(commandArgs);
     } else if (command === "pwd") {
-      commandPwd();
+      commandPwd(redirect);
     } else if (command === "cat") {
-      commandCat(args);
+      commandCat(commandArgs, redirect);
     } else if (command === "type") {
-      commandType(args);
+      commandType(commandArgs);
     } else if (command === "open" || command === "start") {
-      commandOpen(args);
+      commandOpen(commandArgs);
     } else if (command === "adventure") {
       commandOpen(["adventure"]);
     } else if (command === "holywars") {
@@ -1312,9 +2410,9 @@
     } else if (command === "uptime") {
       commandUptime();
     } else if (command === "theme" || command === "themes" || command === "phosphor") {
-      commandTheme(args);
+      commandTheme(commandArgs);
     } else if (command === "mode") {
-      commandMode(args);
+      commandMode(commandArgs);
     } else if (command === "cmd") {
       commandMode(["windows"]);
     } else if (command === "bash") {
@@ -1324,31 +2422,83 @@
     } else if (command === "fortune") {
       commandFortune();
     } else if (command === "tree") {
-      commandTree(args);
+      commandTree(commandArgs);
     } else if (command === "scan") {
       commandScan();
     } else if (command === "whoami") {
-      appendLine(USER);
+      emitLines([USER], redirect, "whoami");
     } else if (command === "hostname") {
-      appendLine(HOST);
+      emitLines([HOST], redirect, "hostname");
     } else if (command === "uname") {
-      appendLine(args.includes("-a") ? "lordsh lordfunion.dev 1.4.0 web-terminal x86_64" : "lordsh");
+      emitLines([commandArgs.includes("-a") ? "Linux lordfunion.dev 6.11.0-web #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux" : "Linux"], redirect, "uname");
     } else if (command === "ver") {
       appendLine("Lord Funion Windows [Version 10.0.26000]");
     } else if (command === "set") {
       commandSet();
     } else if (command === "where") {
-      commandWhere(args);
+      commandWhere(commandArgs);
     } else if (isWindowsMode() && ["copy", "del", "erase", "md", "mkdir", "rd", "ren", "rename", "rmdir"].includes(command)) {
       commandWindowsUnsupported(command);
     } else if (command === "color") {
-      commandTheme(args);
+      commandTheme(commandArgs);
     } else if (command === "path") {
       appendLine("PATH=C:\\Windows\\System32;C:\\Users\\visitor\\projects");
     } else if (command === "prompt") {
       appendLine("PROMPT=$P$G");
     } else if (command === "echo") {
-      appendLine(args.join(" "));
+      commandEcho(commandArgs, redirect);
+    } else if (command === "printf") {
+      commandPrintf(commandArgs, redirect);
+    } else if (command === "touch") {
+      commandTouch(commandArgs);
+    } else if (command === "mkdir") {
+      commandMkdir(commandArgs);
+    } else if (command === "rm") {
+      commandRm(commandArgs);
+    } else if (command === "rmdir") {
+      commandRmdir(commandArgs);
+    } else if (command === "cp") {
+      commandCp(commandArgs);
+    } else if (command === "mv") {
+      commandMv(commandArgs);
+    } else if (command === "grep") {
+      commandGrep(commandArgs, redirect);
+    } else if (command === "find") {
+      commandFind(commandArgs, redirect);
+    } else if (command === "head") {
+      commandHead(commandArgs, redirect);
+    } else if (command === "tail") {
+      commandTail(commandArgs, redirect);
+    } else if (command === "wc") {
+      commandWc(commandArgs, redirect);
+    } else if (command === "stat") {
+      commandStat(commandArgs);
+    } else if (command === "file") {
+      commandFile(commandArgs, redirect);
+    } else if (command === "chmod") {
+      commandChmod(commandArgs);
+    } else if (command === "du") {
+      commandDu(commandArgs, redirect);
+    } else if (command === "df") {
+      commandDf(redirect);
+    } else if (command === "env") {
+      commandEnv(commandArgs, redirect);
+    } else if (command === "printenv") {
+      commandPrintenv(commandArgs, redirect);
+    } else if (command === "export") {
+      commandExport(commandArgs);
+    } else if (command === "ps") {
+      commandPs(redirect);
+    } else if (command === "top") {
+      commandTop();
+    } else if (command === "nano") {
+      commandNano(commandArgs);
+    } else if (command === "more" || command === "less") {
+      commandCat(commandArgs, redirect);
+    } else if (command === "ssh") {
+      commandSsh(commandArgs);
+    } else if (command === "resetfs") {
+      commandResetFs();
     } else if (command === "date") {
       commandDate();
     } else if (command === "time") {
@@ -1358,7 +2508,7 @@
         commandDate();
       }
     } else if (command === "man") {
-      commandMan(args);
+      commandMan(commandArgs);
     } else if (command === "clear" || command === "cls") {
       clearScreen();
     } else if (isWindowsMode() && command === "exit") {
@@ -1436,6 +2586,9 @@
     input.focus();
   });
 
+  fileSystem = loadFileSystem();
+  shellEnv = loadEnvironment();
+  updatePwd();
   applyTheme(getStoredTheme(), false);
   applyShellMode(getStoredShellMode(), false);
   printBoot();
