@@ -16,9 +16,11 @@ jobs:
     steps:
       - name: Pull latest code on cPanel
         run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.CPANEL_SSH_KEY }}" > ~/.ssh/cpanel_key
+          printf '%s\n' "${{ secrets.CPANEL_SSH_KEY }}" | tr -d '\r' > ~/.ssh/cpanel_key
+          test -s ~/.ssh/cpanel_key
           chmod 600 ~/.ssh/cpanel_key
-          ssh-keyscan -p "${{ secrets.CPANEL_PORT }}" "${{ secrets.CPANEL_HOST }}" >> ~/.ssh/known_hosts
-          ssh -i ~/.ssh/cpanel_key -p "${{ secrets.CPANEL_PORT }}" "${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }}" \
+          ssh-keyscan -p "${{ secrets.CPANEL_PORT }}" "${{ secrets.CPANEL_HOST }}" 2>/dev/null >> ~/.ssh/known_hosts
+          ssh -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/cpanel_key -p "${{ secrets.CPANEL_PORT }}" "${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }}" \
             'git -C /home/r5xegw92uu6o/public_html pull --ff-only origin main'
