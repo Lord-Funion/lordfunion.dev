@@ -15,12 +15,21 @@ jobs:
 
     steps:
       - name: Pull latest code on cPanel
+        env:
+          SSHPASS: ${{ secrets.CPANEL_PASSWORD }}
         run: |
           set -euo pipefail
+
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
           mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.CPANEL_SSH_KEY }}" | tr -d '\r' > ~/.ssh/cpanel_key
-          test -s ~/.ssh/cpanel_key
-          chmod 600 ~/.ssh/cpanel_key
           ssh-keyscan -p "${{ secrets.CPANEL_PORT }}" "${{ secrets.CPANEL_HOST }}" 2>/dev/null >> ~/.ssh/known_hosts
-          ssh -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/cpanel_key -p "${{ secrets.CPANEL_PORT }}" "${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }}" \
+
+          sshpass -e ssh \
+            -o PreferredAuthentications=password \
+            -o PubkeyAuthentication=no \
+            -o NumberOfPasswordPrompts=1 \
+            -p "${{ secrets.CPANEL_PORT }}" \
+            "${{ secrets.CPANEL_USER }}@${{ secrets.CPANEL_HOST }}" \
             'git -C /home/r5xegw92uu6o/public_html pull --ff-only origin main'
