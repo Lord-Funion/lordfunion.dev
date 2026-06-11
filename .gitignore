@@ -1,0 +1,10 @@
+# cPanel and public_html folders managed outside this main site repository.
+.well-known/
+cgi-bin/
+error_log
+
+# Separate apps or deployments that live under public_html.
+Adventure-Game/
+HolyWarsGame/
+adventure-api/
+adventure-game/
