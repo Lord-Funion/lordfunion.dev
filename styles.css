@@ -125,6 +125,45 @@ body[data-theme="hotline"] {
   --led-glow: 0 0 12px rgba(255, 94, 170, 0.8);
 }
 
+body[data-theme="windows"] {
+  --bg: #000;
+  --panel: #0c0c0c;
+  --line: #5a5a5a;
+  --text: #cccccc;
+  --text-soft: #f2f2f2;
+  --text-dim: #8f8f8f;
+  --selection-text: #000;
+  --link: #9cdcfe;
+  --scanline: rgba(255, 255, 255, 0.012);
+  --shell-core: #101010;
+  --bar-bg: #1f1f1f;
+  --window-ring: rgba(255, 255, 255, 0.08);
+  --window-glow: rgba(0, 120, 215, 0.2);
+  --text-glow: none;
+  --led-glow: none;
+}
+
+body[data-shell="windows"] {
+  font-family: Consolas, "Lucida Console", "Courier New", monospace;
+}
+
+body[data-shell="windows"] .terminal-shell {
+  background: #000;
+}
+
+body[data-shell="windows"] .terminal-window {
+  border-radius: 0;
+  box-shadow: 0 0 0 1px var(--window-ring);
+}
+
+body[data-shell="windows"] .terminal-bar {
+  min-height: 30px;
+}
+
+body[data-shell="windows"] .terminal-led {
+  border-radius: 0;
+}
+
 button,
 input {
   font: inherit;

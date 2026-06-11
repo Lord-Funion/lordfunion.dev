@@ -4,7 +4,9 @@
   const USER = "visitor";
   const HOST = "lordfunion.dev";
   const HOME = "/home/visitor";
+  const WINDOWS_HOME = "C:\\Users\\visitor";
   const THEME_STORAGE_KEY = "lordfunion-theme";
+  const SHELL_STORAGE_KEY = "lordfunion-shell";
   const OLD_WEB_PATH = "/old-web/";
   const REDIRECT_DELAY_MS = 800;
 
@@ -13,6 +15,8 @@
   const input = document.getElementById("command-input");
   const screen = document.getElementById("screen");
   const promptLabel = document.querySelector(".prompt-label");
+  const terminalTitle = document.querySelector(".terminal-title");
+  const terminalStatus = document.querySelector(".terminal-status");
 
   const state = {
     history: [],
@@ -20,6 +24,7 @@
     bootedAt: new Date(),
     cwd: HOME,
     previousCwd: HOME,
+    shellMode: "unix",
     theme: "classic",
   };
 
@@ -54,6 +59,7 @@
     { name: "cyan", label: "cyan glass" },
     { name: "paper", label: "paper shell" },
     { name: "hotline", label: "hotline magenta" },
+    { name: "windows", label: "Windows console" },
   ];
 
   const THEME_ALIASES = {
@@ -64,11 +70,13 @@
     high: "bright",
     orange: "amber",
     blue: "cyan",
+    cmd: "windows",
     light: "paper",
     pink: "hotline",
+    win: "windows",
   };
 
-  const COMMANDS = {
+  const UNIX_COMMANDS = {
     help: "show available commands",
     ls: "list directory contents",
     cd: "change the current directory",
@@ -78,6 +86,7 @@
     links: "show clickable exits",
     projects: "list public projects",
     theme: "choose terminal palette",
+    mode: "switch shell personality",
     history: "show command history",
     status: "print terminal status",
     whoami: "print current user",
@@ -87,11 +96,33 @@
     clear: "clear the screen",
   };
 
-  const COMMAND_ALIASES = [
+  const WINDOWS_COMMANDS = {
+    help: "show available commands",
+    dir: "list files and directories",
+    cd: "display or change the current directory",
+    chdir: "display or change the current directory",
+    type: "display a text file",
+    start: "open a project link",
+    cls: "clear the screen",
+    echo: "display a message",
+    set: "display environment variables",
+    ver: "display the Windows version",
+    time: "display the current time",
+    date: "display the current date",
+    mode: "switch shell personality",
+    theme: "choose terminal palette",
+    history: "show command history",
+    status: "print terminal status",
+    exit: "return to bash mode",
+  };
+
+  const UNIX_COMMAND_ALIASES = [
     "?",
     "about",
     "adventure",
+    "bash",
     "cls",
+    "cmd",
     "dir",
     "echo",
     "email",
@@ -101,6 +132,7 @@
     "la",
     "ll",
     "man",
+    "mode",
     "phosphor",
     "project",
     "scan",
@@ -116,7 +148,45 @@
     "xyzzy",
   ];
 
-  const COMMAND_NAMES = [...Object.keys(COMMANDS), ...COMMAND_ALIASES].sort();
+  const WINDOWS_COMMAND_ALIASES = [
+    "?",
+    "adventure",
+    "bash",
+    "cmd",
+    "color",
+    "contact",
+    "copy",
+    "del",
+    "erase",
+    "holywars",
+    "links",
+    "md",
+    "mkdir",
+    "path",
+    "projects",
+    "prompt",
+    "rd",
+    "ren",
+    "rename",
+    "rmdir",
+    "themes",
+    "tree",
+    "where",
+    "whoami",
+  ];
+
+  const SHELL_MODES = {
+    unix: {
+      label: "bash",
+      commands: UNIX_COMMANDS,
+      aliases: UNIX_COMMAND_ALIASES,
+    },
+    windows: {
+      label: "cmd.exe",
+      commands: WINDOWS_COMMANDS,
+      aliases: WINDOWS_COMMAND_ALIASES,
+    },
+  };
 
   const FILE_SYSTEM = {
     "/": { type: "dir", entries: ["home", "tmp", "var"] },
@@ -253,7 +323,44 @@
     appendLine("");
   }
 
+  function isWindowsMode() {
+    return state.shellMode === "windows";
+  }
+
+  function getShellMode(modeName) {
+    return SHELL_MODES[modeName] ? modeName : "unix";
+  }
+
+  function getStoredShellMode() {
+    try {
+      return window.localStorage.getItem(SHELL_STORAGE_KEY);
+    } catch {
+      return null;
+    }
+  }
+
+  function saveShellMode(modeName) {
+    try {
+      window.localStorage.setItem(SHELL_STORAGE_KEY, modeName);
+    } catch {
+      // Mode changes still work for the current visit if storage is blocked.
+    }
+  }
+
+  function getCommandTable() {
+    return SHELL_MODES[state.shellMode].commands;
+  }
+
+  function getCommandNames() {
+    const mode = SHELL_MODES[state.shellMode];
+    return [...Object.keys(mode.commands), ...mode.aliases].sort();
+  }
+
   function displayPath(path) {
+    if (isWindowsMode()) {
+      return toWindowsPath(path);
+    }
+
     if (path === HOME) {
       return "~";
     }
@@ -265,12 +372,102 @@
     return path;
   }
 
+  function toWindowsPath(path) {
+    if (path === HOME) {
+      return WINDOWS_HOME;
+    }
+
+    if (path.startsWith(`${HOME}/`)) {
+      return `${WINDOWS_HOME}\\${path.slice(HOME.length + 1).replaceAll("/", "\\")}`;
+    }
+
+    if (path === "/") {
+      return "C:\\";
+    }
+
+    return `C:${path.replaceAll("/", "\\")}`;
+  }
+
+  function fromWindowsPath(rawPath) {
+    let normalized = rawPath.replaceAll("/", "\\");
+    const lower = normalized.toLowerCase();
+
+    if (lower === "%userprofile%") {
+      return HOME;
+    }
+
+    if (lower.startsWith("%userprofile%\\")) {
+      normalized = `${WINDOWS_HOME}${normalized.slice("%userprofile%".length)}`;
+    }
+
+    if (/^[a-z]:$/i.test(normalized)) {
+      return "/";
+    }
+
+    if (normalized.startsWith("\\")) {
+      return normalizePath(normalized.replaceAll("\\", "/"));
+    }
+
+    if (/^[a-z]:\\/i.test(normalized)) {
+      const withoutDrive = normalized.slice(2);
+      const homeLower = WINDOWS_HOME.slice(2).toLowerCase();
+      const withoutDriveLower = withoutDrive.toLowerCase();
+
+      if (withoutDriveLower === homeLower) {
+        return HOME;
+      }
+
+      if (withoutDriveLower.startsWith(`${homeLower}\\`)) {
+        return normalizePath(`${HOME}/${withoutDrive.slice(homeLower.length + 1).replaceAll("\\", "/")}`);
+      }
+
+      return normalizePath(withoutDrive.replaceAll("\\", "/"));
+    }
+
+    return null;
+  }
+
   function getPrompt() {
+    if (isWindowsMode()) {
+      return `${displayPath(state.cwd)}>`;
+    }
+
     return `${USER}@${HOST}:${displayPath(state.cwd)}$`;
   }
 
   function updatePrompt() {
     promptLabel.textContent = getPrompt();
+  }
+
+  function updateShellChrome() {
+    document.body.dataset.shell = state.shellMode;
+
+    if (terminalTitle) {
+      terminalTitle.textContent = isWindowsMode() ? "C:\\Windows\\System32\\cmd.exe" : `${HOST}:/home`;
+    }
+
+    if (terminalStatus) {
+      terminalStatus.textContent = isWindowsMode() ? "CMD" : "ONLINE";
+    }
+
+    updatePrompt();
+  }
+
+  function applyShellMode(modeName, shouldSave = true) {
+    state.shellMode = getShellMode(modeName);
+
+    if (shouldSave) {
+      saveShellMode(state.shellMode);
+    }
+
+    if (isWindowsMode() && state.theme === "classic") {
+      applyTheme("windows", shouldSave);
+    } else if (!isWindowsMode() && state.theme === "windows" && shouldSave) {
+      applyTheme("classic");
+    }
+
+    updateShellChrome();
+    return SHELL_MODES[state.shellMode];
   }
 
   function normalizePath(path) {
@@ -294,8 +491,19 @@
   }
 
   function resolvePath(rawPath = "") {
-    if (!rawPath || rawPath === "~") {
+    if (!rawPath) {
+      return state.cwd;
+    }
+
+    if (rawPath === "~") {
       return HOME;
+    }
+
+    if (isWindowsMode()) {
+      const windowsPath = fromWindowsPath(rawPath);
+      if (windowsPath) {
+        return windowsPath;
+      }
     }
 
     if (rawPath.startsWith("~/")) {
@@ -306,7 +514,7 @@
       return normalizePath(rawPath);
     }
 
-    return normalizePath(`${state.cwd}/${rawPath}`);
+    return normalizePath(`${state.cwd}/${rawPath.replaceAll("\\", "/")}`);
   }
 
   function getNode(path) {
@@ -374,6 +582,55 @@
     return `${getMode(node)} 1 ${USER} web ${size} Jun 11  ${displayName}${target}`;
   }
 
+  function formatWindowsEntry(parentPath, entryName) {
+    const path = childPath(parentPath, entryName);
+    const node = getNode(path);
+    const date = "06/11/2026";
+    const time = "03:42 PM";
+
+    if (node.type === "dir") {
+      return `${date}  ${time}    <DIR>          ${entryName}`;
+    }
+
+    if (node.type === "link") {
+      return `${date}  ${time}    <JUNCTION>     ${entryName} [${node.href}]`;
+    }
+
+    return `${date}  ${time}           ${String(getFileSize(node)).padStart(8, " ")} ${entryName}`;
+  }
+
+  function printWindowsDirectory(path, node) {
+    const visibleEntries = node.entries.filter((entry) => !entry.startsWith("."));
+    let fileCount = 0;
+    let dirCount = 0;
+    let totalSize = 0;
+
+    appendLine(` Volume in drive C is LORDFUNION`);
+    appendLine(` Volume Serial Number is 4C46-4456`);
+    blank();
+    appendLine(` Directory of ${displayPath(path)}`);
+    blank();
+
+    appendLine("06/11/2026  03:42 PM    <DIR>          .");
+    appendLine("06/11/2026  03:42 PM    <DIR>          ..");
+    dirCount += 2;
+
+    for (const entry of visibleEntries) {
+      const child = getNode(childPath(path, entry));
+      appendLine(formatWindowsEntry(path, entry));
+
+      if (child.type === "dir" || child.type === "link") {
+        dirCount += 1;
+      } else {
+        fileCount += 1;
+        totalSize += getFileSize(child);
+      }
+    }
+
+    appendLine(`               ${String(fileCount).padStart(2, " ")} File(s) ${String(totalSize).padStart(14, " ")} bytes`);
+    appendLine(`               ${String(dirCount).padStart(2, " ")} Dir(s)  999,999,999,999 bytes free`);
+  }
+
   function parseShellInput(raw) {
     const args = [];
     let current = "";
@@ -387,7 +644,7 @@
         continue;
       }
 
-      if (char === "\\") {
+      if (char === "\\" && !isWindowsMode()) {
         escaping = true;
         continue;
       }
@@ -443,8 +700,14 @@
   }
 
   function printBoot() {
-    appendLine("[boot] lordfunion.dev ready");
-    appendLine("[boot] interactive shell mounted at /home/visitor");
+    if (isWindowsMode()) {
+      appendLine("Lord Funion Windows [Version 10.0.26000]");
+      appendLine("(c) Lord Funion. All rights reserved.");
+      blank();
+    } else {
+      appendLine("[boot] lordfunion.dev ready");
+      appendLine("[boot] interactive shell mounted at /home/visitor");
+    }
     blank();
     printLinks();
     blank();
@@ -469,7 +732,7 @@
 
   function commandHelp() {
     appendLine("available commands:");
-    printCommandList(COMMANDS);
+    printCommandList(getCommandTable());
     blank();
     printLinks();
   }
@@ -479,6 +742,11 @@
   }
 
   function commandProjects() {
+    if (isWindowsMode()) {
+      commandDir([`${WINDOWS_HOME}\\projects`]);
+      return;
+    }
+
     commandLs(["~/projects"]);
   }
 
@@ -490,6 +758,11 @@
   }
 
   function commandContact() {
+    if (isWindowsMode()) {
+      commandType([`${WINDOWS_HOME}\\contact.txt`]);
+      return;
+    }
+
     commandCat(["~/contact.txt"]);
   }
 
@@ -502,8 +775,8 @@
     appendLine("terminal status:");
     appendLine(`  user: ${USER}`);
     appendLine(`  host: ${HOST}`);
-    appendLine(`  cwd: ${state.cwd}`);
-    appendLine(`  shell: lordsh 1.4.0`);
+    appendLine(`  cwd: ${displayPath(state.cwd)}`);
+    appendLine(`  shell: ${SHELL_MODES[state.shellMode].label}`);
     appendLine(`  theme: ${theme.label}`);
     appendLine(`  uptime: ${minutes}m ${seconds}s`);
     appendLine(`  commands entered: ${state.history.length}`);
@@ -651,23 +924,56 @@
     }
   }
 
+  function commandDir(args) {
+    const paths = args.filter((arg) => !arg.startsWith("/"));
+    const targets = paths.length ? paths : [""];
+
+    for (const [index, target] of targets.entries()) {
+      const path = resolvePath(target);
+      const node = getNode(path);
+
+      if (index > 0) {
+        blank();
+      }
+
+      if (!node) {
+        appendLine("File Not Found");
+        continue;
+      }
+
+      if (node.type !== "dir") {
+        appendLine(formatWindowsEntry(state.cwd, getBasename(path)));
+        continue;
+      }
+
+      printWindowsDirectory(path, node);
+    }
+  }
+
   function commandCd(args) {
-    if (args.length > 1) {
+    const cdArgs = isWindowsMode() && args[0] === "/d" ? args.slice(1) : args;
+
+    if (isWindowsMode() && cdArgs.length === 0) {
+      appendLine(displayPath(state.cwd));
+      return;
+    }
+
+    if (!isWindowsMode() && cdArgs.length > 1) {
       appendLine("cd: too many arguments");
       return;
     }
 
-    const target = args[0] || "~";
+    const target = cdArgs.join(" ") || "~";
     const path = target === "-" ? state.previousCwd : resolvePath(target);
     const node = getNode(path);
 
     if (!node) {
-      appendLine(`cd: ${target}: No such file or directory`);
+      appendLine(isWindowsMode() ? "The system cannot find the path specified." : `cd: ${target}: No such file or directory`);
       return;
     }
 
     if (node.type !== "dir") {
-      appendLine(`cd: ${target}: Not a directory`);
+      appendLine(isWindowsMode() ? "The directory name is invalid." : `cd: ${target}: Not a directory`);
       return;
     }
 
@@ -716,6 +1022,37 @@
     }
   }
 
+  function commandType(args) {
+    if (!args.length) {
+      appendLine("The syntax of the command is incorrect.");
+      return;
+    }
+
+    for (const target of args) {
+      const path = resolvePath(target);
+      const node = getNode(path);
+
+      if (!node) {
+        appendLine("The system cannot find the file specified.");
+        continue;
+      }
+
+      if (node.type === "dir") {
+        appendLine("Access is denied.");
+        continue;
+      }
+
+      if (node.type === "link") {
+        appendLine(`${getBasename(path)} -> ${node.href}`);
+        continue;
+      }
+
+      for (const line of node.content) {
+        appendLine(line);
+      }
+    }
+  }
+
   function commandOpen(args) {
     const rawTarget = args.join(" ").toLowerCase();
 
@@ -743,7 +1080,7 @@
       return;
     }
 
-    appendLine(`open: ${rawTarget}: no such link`);
+    appendLine(isWindowsMode() ? "The system cannot find the file specified." : `open: ${rawTarget}: no such link`);
   }
 
   function commandHistory() {
@@ -802,7 +1139,16 @@
   }
 
   function commandDate() {
+    if (isWindowsMode()) {
+      appendLine(`The current date is: ${new Date().toLocaleDateString()}`);
+      return;
+    }
+
     appendLine(new Date().toString());
+  }
+
+  function commandWindowsTime() {
+    appendLine(`The current time is: ${new Date().toLocaleTimeString()}`);
   }
 
   function commandUptime() {
@@ -814,15 +1160,85 @@
 
   function commandMan(args) {
     const topic = (args[0] || "").toLowerCase();
-    if (!topic || !COMMANDS[topic]) {
+    if (!topic || !getCommandTable()[topic]) {
       appendLine("What manual page do you want?");
       return;
     }
 
-    appendLine(`${topic} - ${COMMANDS[topic]}`);
+    appendLine(`${topic} - ${getCommandTable()[topic]}`);
+  }
+
+  function commandMode(args) {
+    const requested = (args[0] || "").toLowerCase();
+
+    if (!requested) {
+      appendLine(`shell mode: ${SHELL_MODES[state.shellMode].label}`);
+      appendLine([
+        "  ",
+        { type: "command", value: "mode unix" },
+        " - bash-style shell",
+      ]);
+      appendLine([
+        "  ",
+        { type: "command", value: "mode windows" },
+        " - Command Prompt-style shell",
+      ]);
+      return;
+    }
+
+    if (requested === "windows" || requested === "cmd" || requested === "win") {
+      applyShellMode("windows");
+      appendLine("Microsoft Windows [Version 10.0.26000]");
+      return;
+    }
+
+    if (requested === "unix" || requested === "bash" || requested === "linux") {
+      applyShellMode("unix");
+      appendLine("bash mode restored");
+      return;
+    }
+
+    appendLine(`mode: ${requested}: unknown shell mode`);
+  }
+
+  function commandSet() {
+    appendLine(`COMPUTERNAME=${HOST.toUpperCase().replaceAll(".", "-")}`);
+    appendLine(`HOMEDRIVE=C:`);
+    appendLine(`HOMEPATH=\\Users\\visitor`);
+    appendLine(`PATH=C:\\Windows\\System32;C:\\Users\\visitor\\projects`);
+    appendLine(`PROMPT=$P$G`);
+    appendLine(`USERNAME=${USER}`);
+    appendLine(`USERPROFILE=${WINDOWS_HOME}`);
+  }
+
+  function commandWhere(args) {
+    const requested = args[0];
+
+    if (!requested) {
+      appendLine("INFO: Could not find files for the given pattern(s).");
+      return;
+    }
+
+    const lowerRequested = requested.toLowerCase();
+    if (getCommandNames().includes(lowerRequested)) {
+      appendLine(`C:\\Windows\\System32\\${lowerRequested}.exe`);
+      return;
+    }
+
+    appendLine("INFO: Could not find files for the given pattern(s).");
+  }
+
+  function commandWindowsUnsupported(command) {
+    appendLine(`'${command}' is recognized, but this web shell does not modify files.`);
   }
 
   function commandUnknown(command) {
+    if (isWindowsMode()) {
+      appendLine(`'${command}' is not recognized as an internal or external command,`);
+      appendLine("operable program or batch file.");
+      return;
+    }
+
     appendLine(`bash: ${command}: command not found`);
   }
 
@@ -863,19 +1279,23 @@
       commandHelp();
     } else if (command === "links") {
       commandLinks();
-    } else if (command === "ls" || command === "dir") {
+    } else if (command === "ls" || (!isWindowsMode() && command === "dir")) {
       commandLs(args);
+    } else if (isWindowsMode() && command === "dir") {
+      commandDir(args);
     } else if (command === "ll") {
       commandLs(["-l", ...args]);
     } else if (command === "la") {
       commandLs(["-la", ...args]);
-    } else if (command === "cd") {
+    } else if (command === "cd" || command === "chdir") {
       commandCd(args);
     } else if (command === "pwd") {
       commandPwd();
     } else if (command === "cat") {
       commandCat(args);
-    } else if (command === "open") {
+    } else if (command === "type") {
+      commandType(args);
+    } else if (command === "open" || command === "start") {
       commandOpen(args);
     } else if (command === "adventure") {
       commandOpen(["adventure"]);
@@ -893,6 +1313,12 @@
       commandUptime();
     } else if (command === "theme" || command === "themes" || command === "phosphor") {
       commandTheme(args);
+    } else if (command === "mode") {
+      commandMode(args);
+    } else if (command === "cmd") {
+      commandMode(["windows"]);
+    } else if (command === "bash") {
+      commandMode(["unix"]);
     } else if (command === "history") {
       commandHistory();
     } else if (command === "fortune") {
@@ -907,14 +1333,36 @@
       appendLine(HOST);
     } else if (command === "uname") {
       appendLine(args.includes("-a") ? "lordsh lordfunion.dev 1.4.0 web-terminal x86_64" : "lordsh");
+    } else if (command === "ver") {
+      appendLine("Lord Funion Windows [Version 10.0.26000]");
+    } else if (command === "set") {
+      commandSet();
+    } else if (command === "where") {
+      commandWhere(args);
+    } else if (isWindowsMode() && ["copy", "del", "erase", "md", "mkdir", "rd", "ren", "rename", "rmdir"].includes(command)) {
+      commandWindowsUnsupported(command);
+    } else if (command === "color") {
+      commandTheme(args);
+    } else if (command === "path") {
+      appendLine("PATH=C:\\Windows\\System32;C:\\Users\\visitor\\projects");
+    } else if (command === "prompt") {
+      appendLine("PROMPT=$P$G");
     } else if (command === "echo") {
       appendLine(args.join(" "));
-    } else if (command === "date" || command === "time") {
+    } else if (command === "date") {
       commandDate();
+    } else if (command === "time") {
+      if (isWindowsMode()) {
+        commandWindowsTime();
+      } else {
+        commandDate();
+      }
     } else if (command === "man") {
       commandMan(args);
     } else if (command === "clear" || command === "cls") {
       clearScreen();
+    } else if (isWindowsMode() && command === "exit") {
+      commandMode(["unix"]);
     } else if (command === "exit" || command === "logout") {
       appendLine("logout");
     } else if (command === "sudo") {
@@ -936,7 +1384,7 @@
       return;
     }
 
-    const matches = COMMAND_NAMES.filter((name) => name.startsWith(trimmedStart.toLowerCase()));
+    const matches = getCommandNames().filter((name) => name.startsWith(trimmedStart.toLowerCase()));
     if (matches.length === 1) {
       input.value = `${matches[0]} `;
       return;
@@ -989,6 +1437,6 @@
   });
 
   applyTheme(getStoredTheme(), false);
-  updatePrompt();
+  applyShellMode(getStoredShellMode(), false);
   printBoot();
 })();
