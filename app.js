@@ -33,10 +33,10 @@
   const LINKS = [
     {
       command: "adventure",
-      aliases: ["adventure-game", "game"],
-      href: "/Adventure-Game/",
-      label: "Adventure Game",
-      description: "play the web port",
+      aliases: ["adventure-game", "game", "realmbound"],
+      href: "/realmbound/",
+      label: "Realmbound",
+      description: "play the web port of Realmbound",
     },
     {
       command: "holywars",
