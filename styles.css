@@ -257,44 +257,6 @@ input {
   white-space: pre;
 }
 
-.site-intro {
-  margin: -4px 0 14px;
-  color: var(--text-soft);
-}
-
-.quick-launch {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 1px;
-  margin: 0 0 18px;
-  border: 1px solid var(--line);
-  background: var(--line);
-  text-shadow: none;
-}
-
-.quick-launch a {
-  min-width: 0;
-  padding: 8px 10px;
-  overflow: hidden;
-  color: var(--text-soft);
-  background: var(--panel);
-  text-decoration: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.quick-launch a span {
-  margin-right: 6px;
-  color: var(--text-dim);
-}
-
-.quick-launch a:hover,
-.quick-launch a:focus-visible {
-  color: var(--selection-text);
-  background: var(--text);
-  outline: 0;
-}
-
 .terminal-output {
   min-height: 12rem;
   white-space: pre-wrap;
@@ -459,11 +421,4 @@ input {
     max-width: none;
   }
 
-  .quick-launch {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .quick-launch a:last-child {
-    grid-column: 1 / -1;
-  }
 }
