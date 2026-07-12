@@ -32,11 +32,28 @@
 
   const LINKS = [
     {
+      command: "gdnn",
+      aliases: ["neural-dash", "geometry-dash-ai"],
+      href: "/GDNN/",
+      label: "GDNN",
+      description: "train neural agents on an endless dash course",
+      featured: true,
+    },
+    {
+      command: "dinoswords",
+      aliases: ["dino-swords", "dino swords", "dino"],
+      href: "https://dinoswords.lordfunion.dev/",
+      label: "DinoSwords",
+      description: "play the weapon-packed offline runner",
+      featured: true,
+    },
+    {
       command: "adventure",
       aliases: ["adventure-game", "game", "realmbound"],
       href: "/realmbound/",
       label: "Realmbound",
       description: "play the web port of Realmbound",
+      featured: true,
     },
     {
       command: "holywars",
@@ -44,6 +61,15 @@
       href: "/HolyWarsGame",
       label: "Holy Wars Game",
       description: "open the other game",
+      featured: true,
+    },
+    {
+      command: "github",
+      aliases: ["source", "code", "lord-funion"],
+      href: "https://github.com/Lord-Funion",
+      label: "GitHub",
+      description: "browse all Lord-Funion repositories",
+      featured: true,
     },
     {
       command: "old-web",
@@ -154,8 +180,11 @@
     "email",
     "exit",
     "fortune",
+    "gdnn",
     "grep",
     "holywars",
+    "dinoswords",
+    "github",
     "la",
     "ll",
     "more",
@@ -255,7 +284,7 @@
     "/home/visitor/contact.txt": {
       type: "file",
       content: [
-        "GitHub: https://github.com/lordfunion",
+        "GitHub: https://github.com/Lord-Funion",
         "Web:    https://lordfunion.dev",
       ],
     },
@@ -280,12 +309,32 @@
     },
     "/home/visitor/projects": {
       type: "dir",
-      entries: ["Adventure-Game", "HolyWarsGame", "lordfunion.dev"],
+      entries: ["DinoSwords", "GDNN", "GitHub", "Realmbound", "HolyWarsGame", "lordfunion.dev"],
     },
     "/home/visitor/projects/Adventure-Game": {
       type: "link",
       href: "/Adventure-Game/",
       description: "web port",
+    },
+    "/home/visitor/projects/Realmbound": {
+      type: "link",
+      href: "/realmbound/",
+      description: "web port",
+    },
+    "/home/visitor/projects/GDNN": {
+      type: "link",
+      href: "/GDNN/",
+      description: "neural dash trainer",
+    },
+    "/home/visitor/projects/DinoSwords": {
+      type: "link",
+      href: "https://dinoswords.lordfunion.dev/",
+      description: "offline runner",
+    },
+    "/home/visitor/projects/GitHub": {
+      type: "link",
+      href: "https://github.com/Lord-Funion",
+      description: "source profile",
     },
     "/home/visitor/projects/HolyWarsGame": {
       type: "link",
@@ -1092,7 +1141,7 @@
 
   function printLinks() {
     appendLine("main links:");
-    for (const link of LINKS.slice(0, 2)) {
+    for (const link of LINKS.filter((candidate) => candidate.featured)) {
       appendLine([
         "  ",
         { type: "link", href: link.href, label: link.label },
@@ -1123,7 +1172,7 @@
 
   function commandAbout() {
     appendLine("site file:");
-    appendLine("  handle: lordfunion");
+    appendLine("  handle: Lord-Funion");
     appendLine("  mode: terminal shell");
     appendLine("  current mission: keep the exits obvious and the secrets optional");
   }
@@ -2399,6 +2448,8 @@
       commandOpen(["adventure"]);
     } else if (command === "holywars") {
       commandOpen(["holywars"]);
+    } else if (command === "gdnn" || command === "dinoswords" || command === "github") {
+      commandOpen([command]);
     } else if (command === "projects" || command === "project") {
       commandProjects();
     } else if (command === "about") {
