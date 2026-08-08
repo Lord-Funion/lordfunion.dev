@@ -72,6 +72,13 @@
       featured: true,
     },
     {
+      command: "celeste",
+      aliases: ["studio"],
+      href: "/CEleste-Studio/",
+      description: "create maps for CEleste for TI 84 Plus CE",
+      featured: true,
+    },
+    {
       command: "old-web",
       aliases: ["oldweb", "relic"],
       href: OLD_WEB_PATH,
