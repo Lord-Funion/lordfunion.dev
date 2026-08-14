@@ -73,10 +73,18 @@
     },
     {
       command: "celeste",
-      aliases: ["studio", "celedit", "celeste-studio"],
+      aliases: ["celedit", "celeste-hub"],
       href: "/celeste/",
       label: "CEleste",
       description: "CEleste game, Studio, CELEDIT, and custom level downloads",
+      featured: true,
+    },
+    {
+      command: "studio",
+      aliases: ["celeste-studio"],
+      href: "/CEleste-Studio/",
+      label: "CEleste Studio",
+      description: "open the browser level and pack editor",
       featured: true,
     },
     {
@@ -181,6 +189,8 @@
     "about",
     "adventure",
     "bash",
+    "celeste",
+    "celedit",
     "cls",
     "cmd",
     "dir",
@@ -207,6 +217,7 @@
     "social",
     "socials",
     "source",
+    "studio",
     "ssh",
     "sudo",
     "themes",
@@ -222,6 +233,8 @@
     "?",
     "adventure",
     "bash",
+    "celeste",
+    "celedit",
     "cmd",
     "color",
     "contact",
@@ -234,6 +247,7 @@
     "mkdir",
     "path",
     "projects",
+    "studio",
     "prompt",
     "rd",
     "ren",
@@ -317,7 +331,7 @@
     },
     "/home/visitor/projects": {
       type: "dir",
-      entries: ["CEleste", "DinoSwords", "GDNN", "GitHub", "Realmbound", "HolyWarsGame", "lordfunion.dev"],
+      entries: ["CEleste", "CEleste-Studio", "DinoSwords", "GDNN", "GitHub", "Realmbound", "HolyWarsGame", "lordfunion.dev"],
     },
     "/home/visitor/projects/Adventure-Game": {
       type: "link",
@@ -353,6 +367,11 @@
       type: "link",
       href: "/celeste/",
       description: "CEleste game, Studio, CELEDIT, and custom levels",
+    },
+    "/home/visitor/projects/CEleste-Studio": {
+      type: "link",
+      href: "/CEleste-Studio/",
+      description: "browser level and pack editor",
     },
     "/home/visitor/projects/lordfunion.dev": {
       type: "file",
@@ -2461,7 +2480,7 @@
       commandOpen(["adventure"]);
     } else if (command === "holywars") {
       commandOpen(["holywars"]);
-    } else if (command === "gdnn" || command === "dinoswords" || command === "github") {
+    } else if (command === "gdnn" || command === "dinoswords" || command === "github" || command === "celeste" || command === "celedit" || command === "studio") {
       commandOpen([command]);
     } else if (command === "projects" || command === "project") {
       commandProjects();
