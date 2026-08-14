@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="CEleste for TI-84 Plus CE: download the game, CEleste Studio, CELEDIT, and learn how custom levels work.">
+  <title>CEleste · Lord Funion</title>
+  <link rel="stylesheet" href="styles.css?v=20260814">
+</head>
+<body>
+  <div class="snow" aria-hidden="true"></div>
+  <header class="hero">
+    <nav class="nav">
+      <a class="brand" href="/">lordfunion.dev</a>
+      <div class="nav-links">
+        <a href="#downloads">Downloads</a>
+        <a href="#editors">Editors</a>
+        <a href="#custom-levels">Custom levels</a>
+        <a href="https://github.com/Lord-Funion/CEleste">GitHub</a>
+      </div>
+    </nav>
+
+    <div class="hero-copy">
+      <p class="eyebrow">TI-84 PLUS CE · CELESTE CLASSIC PORT + CUSTOM LEVEL ECOSYSTEM</p>
+      <h1>C<span>E</span>leste</h1>
+      <p class="lead">Play Celeste Classic on the TI-84 Plus CE, build your own mountains, package multi-level adventures, and move between the calculator and browser editors without changing formats.</p>
+      <div class="hero-actions" id="downloads">
+        <a id="gameDownload" class="button primary" href="https://github.com/Lord-Funion/CEleste/releases">Download CEleste</a>
+        <a class="button" href="/CEleste-Studio/">Open CEleste Studio</a>
+        <a id="celeditDownload" class="button" href="https://github.com/Lord-Funion/CEleste/releases">Download CELEDIT</a>
+      </div>
+      <p id="releaseStatus" class="release-status">Checking the newest calculator builds…</p>
+    </div>
+
+    <div class="mountain" aria-hidden="true">
+      <div class="peak peak-back"></div>
+      <div class="peak peak-front"></div>
+      <div class="flag"></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section intro-grid">
+      <article class="feature-card accent-red">
+        <div class="icon">▲</div>
+        <h2>CEleste</h2>
+        <p>The calculator game. It keeps the original Celeste Classic campaign and adds a custom-level browser, CELV levels and packs, extended entities, rotation, and calculator-friendly custom mechanics.</p>
+        <div class="card-actions">
+          <a id="gameDownloadCard" href="https://github.com/Lord-Funion/CEleste/releases">Get the .8xp</a>
+          <a href="https://github.com/Lord-Funion/CEleste">Source</a>
+        </div>
+      </article>
+
+      <article class="feature-card accent-purple" id="editors">
+        <div class="icon">▦</div>
+        <h2>CEleste Studio</h2>
+        <p>The full browser editor for levels and packs: complete logical pieces, room ordering, rotation, validation, import/export, browser autosave, community levels, and original-cartridge preview.</p>
+        <div class="card-actions">
+          <a href="/CEleste-Studio/">Launch Studio</a>
+          <a href="https://github.com/Lord-Funion/CEleste-Studio">Source</a>
+        </div>
+      </article>
+
+      <article class="feature-card accent-blue">
+        <div class="icon">⌨</div>
+        <h2>CELEDIT</h2>
+        <p>The native TI-84 Plus CE editor for making CELV levels directly on the calculator. It has terrain and entity palettes, room management, rotation, properties, undo/redo, drafts, and direct AppVar export.</p>
+        <div class="card-actions">
+          <a id="celeditDownloadCard" href="https://github.com/Lord-Funion/CEleste/releases">Get CELEDIT</a>
+          <a href="https://github.com/Lord-Funion/CEleste/tree/master/tools/calculator-editor">Editor source</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="section completion-section">
+      <div class="section-heading">
+        <p class="eyebrow">CUSTOM LEVEL POLISH</p>
+        <h2>Finishing a mountain now feels finished.</h2>
+      </div>
+      <div class="completion-demo" aria-label="Example of the custom level completion flow">
+        <div class="result-panel">
+          <strong>LEVEL COMPLETE</strong>
+          <span class="result-title">YOUR MOUNTAIN</span>
+          <span class="tiny-flag">⚑</span>
+          <div><small>TIME</small><b>00:04:27</b></div>
+          <div><small>DEATHS</small><b>13</b></div>
+          <p>2ND: LEVELS</p>
+          <p>ALPHA: REPLAY</p>
+          <p>MODE: TITLE</p>
+        </div>
+        <div class="completion-copy">
+          <h3>No more instant title-screen dump.</h3>
+          <p>After the final room, CEleste keeps the completed room behind a summit-style result card and freezes the run timer. You can jump straight back to the custom-level browser, replay the run, or return to the normal title screen.</p>
+          <p>For packs, time and deaths carry across the pack and the final result is shown as a pack completion.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="custom-levels">
+      <div class="section-heading">
+        <p class="eyebrow">MAKE → EXPORT → PLAY</p>
+        <h2>Custom levels without format juggling.</h2>
+      </div>
+      <div class="steps">
+        <article><span>01</span><h3>Build</h3><p>Use CEleste Studio on a computer or CELEDIT directly on your calculator. Both target the same CELV custom-level format.</p></article>
+        <article><span>02</span><h3>Export</h3><p>Export a single level or pack as an <code>.8xv</code> AppVar, then transfer it to the calculator alongside CEleste.</p></article>
+        <article><span>03</span><h3>Browse</h3><p>On CEleste's title screen, press <kbd>MODE</kbd> to open Custom Levels. Pick a level or pack and press <kbd>2ND</kbd> or <kbd>ALPHA</kbd>.</p></article>
+        <article><span>04</span><h3>Finish</h3><p>Rooms complete through the top edge. The last room now leads to the results screen instead of immediately throwing you back home.</p></article>
+      </div>
+    </section>
+
+    <section class="section details-grid">
+      <article>
+        <p class="eyebrow">STUDIO QOL</p>
+        <h2>Faster room editing</h2>
+        <p>Studio has direct Previous/Next Room controls and <kbd>[</kbd>/<kbd>]</kbd> shortcuts, plus <kbd>Ctrl/Cmd+S</kbd> for project saves. The old unlisted Share Project button is gone; public level discovery stays in the Community Level Browser.</p>
+      </article>
+      <article>
+        <p class="eyebrow">CELEDIT QOL</p>
+        <h2>Less menu hopping</h2>
+        <p>CELEDIT now marks unsaved edits, lets <kbd>MODE</kbd> quick-save a draft from the editor, and keeps the existing one-button undo/redo and room switching controls visible and useful.</p>
+      </article>
+    </section>
+
+    <section class="section resources">
+      <div class="section-heading">
+        <p class="eyebrow">PROJECT LINKS</p>
+        <h2>Everything in one place.</h2>
+      </div>
+      <div class="resource-links">
+        <a href="https://github.com/Lord-Funion/CEleste/releases"><b>All calculator releases</b><span>CEleste + CELEDIT builds</span></a>
+        <a href="https://github.com/Lord-Funion/CEleste"><b>CEleste repository</b><span>Game, format, CELEDIT, docs</span></a>
+        <a href="https://github.com/Lord-Funion/CEleste-Studio"><b>Studio repository</b><span>Browser editor source</span></a>
+        <a href="/CEleste-Studio/"><b>Hosted Studio</b><span>Create or edit a level now</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <a href="/">← back to lordfunion.dev</a>
+    <p>Unofficial community software. CEleste is not affiliated with or endorsed by Extremely OK Games, Lexaloffle, or Texas Instruments.</p>
+  </footer>
+
+  <script src="app.js?v=20260814"></script>
+</body>
+</html>
