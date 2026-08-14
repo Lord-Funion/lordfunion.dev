@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Download CEleste for TI-84 Plus CE, build custom levels in CEleste Studio or CELEDIT, and learn how to move levels to your calculator.">
+  <meta name="theme-color" content="#17102f">
+  <meta property="og:title" content="CEleste — play and build custom climbs">
+  <meta property="og:description" content="The CEleste game, browser Studio, calculator-native CELEDIT editor, downloads, and setup guide in one place.">
+  <meta property="og:image" content="https://lordfunion.dev/celeste/screenshot.png">
+  <title>CEleste — lordfunion.dev</title>
+  <link rel="stylesheet" href="styles.css?v=20260814">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to CEleste</a>
+  <header class="site-header">
+    <a class="terminal-link" href="/" aria-label="Back to lordfunion.dev">visitor@lordfunion.dev:<span>~/celeste</span>$</a>
+    <nav aria-label="CEleste navigation">
+      <a href="#tools">Tools</a>
+      <a href="#install">Install</a>
+      <a href="#downloads">Downloads</a>
+      <a class="nav-studio" href="/CEleste-Studio/">Open Studio</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="stars" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <p class="eyebrow">TI-84 Plus CE · custom levels · two editors</p>
+        <h1 id="hero-title"><span>C</span>Eleste</h1>
+        <p class="lede">Celeste Classic on your calculator, with a complete custom-level pipeline. Play the mountain, build a room in your browser or directly on the calculator, then climb it for real.</p>
+        <div class="hero-actions">
+          <a class="button primary" data-release-asset="CELESTE.8xp" href="https://github.com/Lord-Funion/CEleste/releases/latest/download/CELESTE.8xp">Download CEleste</a>
+          <a class="button secondary" href="/CEleste-Studio/">Open CEleste Studio</a>
+          <a class="button ghost" data-release-asset="CELEDIT.8xp" href="https://github.com/Lord-Funion/CEleste/releases">Download CELEDIT</a>
+        </div>
+        <p class="release-note" data-release-status aria-live="polite">Release links are ready; checking for the newest builds…</p>
+      </div>
+
+      <figure class="game-frame">
+        <div class="calculator-bar"><span>CEleste</span><span>TI-84+ CE</span></div>
+        <img src="screenshot.png" width="640" height="480" alt="CEleste running on a TI-84 Plus CE calculator">
+        <figcaption>One mountain. Tiny screen. No small ambition.</figcaption>
+      </figure>
+
+      <div class="mountain" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    </section>
+
+    <section class="section intro" aria-labelledby="one-format-title">
+      <p class="section-kicker">One level format</p>
+      <h2 id="one-format-title">Build anywhere. Play on the calculator.</h2>
+      <p>Studio and CELEDIT both export CELV levels as calculator AppVars. Transfer the resulting <code>.8xv</code>, open CEleste’s custom-level browser with <kbd>MODE</kbd>, and play. Finishing the last room now lands on a summit-style results screen with your time and deaths, plus replay, level-select, and title choices.</p>
+    </section>
+
+    <section id="tools" class="section" aria-labelledby="tools-title">
+      <div class="section-heading">
+        <div><p class="section-kicker">The toolkit</p><h2 id="tools-title">Three parts, one climb</h2></div>
+        <p>Start with the editor that fits where you are. The exported level format is shared.</p>
+      </div>
+      <div class="tool-grid">
+        <article class="tool-card game-card">
+          <p class="card-number">01 / PLAY</p>
+          <h3>CEleste</h3>
+          <p>The calculator game and custom-level runtime. Browse installed levels, play packs, and finish on a proper results screen instead of being thrown back to the title.</p>
+          <ul><li>Celeste Classic campaign</li><li>CELV level and pack support</li><li>Run time and death results</li></ul>
+          <a data-release-asset="CELESTE.8xp" href="https://github.com/Lord-Funion/CEleste/releases/latest/download/CELESTE.8xp">Get CELESTE.8xp <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="tool-card studio-card">
+          <p class="card-number">02 / BUILD IN BROWSER</p>
+          <h3>CEleste Studio</h3>
+          <p>The full desktop editor: mouse painting, packs, import/export, validation, community levels, local autosave, and an original-cartridge preview.</p>
+          <ul><li>Fast room and pack editing</li><li>Live validation and preview</li><li>No install required</li></ul>
+          <a href="/CEleste-Studio/">Launch Studio <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="tool-card celedit-card">
+          <p class="card-number">03 / BUILD ON-CALC</p>
+          <h3>CELEDIT</h3>
+          <p>A calculator-native editor with a visual palette, pencil, erase, fill, picker, room manager, rotation, gameplay properties, undo, and redo.</p>
+          <ul><li>Create without a computer</li><li>Safe room management</li><li>Visible saved/unsaved state</li></ul>
+          <a data-release-asset="CELEDIT.8xp" href="https://github.com/Lord-Funion/CEleste/releases">Get CELEDIT.8xp <span aria-hidden="true">→</span></a>
+        </article>
+      </div>
+    </section>
+
+    <section class="section editor-choice" aria-labelledby="choice-title">
+      <div><p class="section-kicker">Pick your editor</p><h2 id="choice-title">Studio for speed. CELEDIT for freedom.</h2></div>
+      <div class="choice-grid">
+        <article><strong>CEleste Studio</strong><span>Best for larger packs and quick iteration</span><p>32 rooms per level, mouse painting, project files, `.8xv` import, browser preview, community browsing, and deeper validation.</p><a href="/CEleste-Studio/">Use the browser editor</a></article>
+        <article><strong>CELEDIT</strong><span>Best for building entirely on hardware</span><p>16-room levels, a compact visual palette, complete logical pieces, room thumbnails, project metadata, and CELV export from the calculator.</p><a data-release-asset="CELEDIT.8xp" href="https://github.com/Lord-Funion/CEleste/releases">Download the calculator editor</a></article>
+      </div>
+    </section>
+
+    <section id="install" class="section install" aria-labelledby="install-title">
+      <div class="section-heading">
+        <div><p class="section-kicker">From download to dash</p><h2 id="install-title">Install in three steps</h2></div>
+        <p>You need a TI-84 Plus CE or TI-83 Premium CE, a USB cable, and the CE C libraries.</p>
+      </div>
+      <ol class="steps">
+        <li><span>1</span><div><h3>Get the programs</h3><p>Download <a data-release-asset="CELESTE.8xp" href="https://github.com/Lord-Funion/CEleste/releases/latest/download/CELESTE.8xp">CELESTE.8xp</a>. Add <a data-release-asset="CELEDIT.8xp" href="https://github.com/Lord-Funion/CEleste/releases">CELEDIT.8xp</a> if you want to build on-calc, and install the <a href="https://tiny.cc/clibs">C Libraries</a>.</p></div></li>
+        <li><span>2</span><div><h3>Send them to the calculator</h3><p>Use <a href="https://education.ti.com/en/products/computer-software/ti-connect-ce-sw">TI Connect CE</a> or TiLP to transfer the program files and any custom `.8xv` levels.</p></div></li>
+        <li><span>3</span><div><h3>Climb</h3><p>Run <code>prgmCELESTE</code>. Press <kbd>MODE</kbd> on the title screen for custom levels, then <kbd>2ND</kbd> to launch the selected level.</p></div></li>
+      </ol>
+      <p class="install-note">If your OS blocks assembly programs, follow the <a href="https://yvantt.github.io/arTIfiCE/">arTIfiCE</a> instructions for your calculator first.</p>
+    </section>
+
+    <section id="downloads" class="section downloads" aria-labelledby="downloads-title">
+      <div><p class="section-kicker">Everything in one place</p><h2 id="downloads-title">Downloads and source</h2></div>
+      <div class="download-list">
+        <a data-release-asset="CELESTE.8xp" href="https://github.com/Lord-Funion/CEleste/releases/latest/download/CELESTE.8xp"><span><strong>CEleste game</strong><small data-release-label="CELESTE.8xp">Latest automatic build · .8xp</small></span><b>Download</b></a>
+        <a data-release-asset="CELEDIT.8xp" href="https://github.com/Lord-Funion/CEleste/releases"><span><strong>CELEDIT calculator editor</strong><small data-release-label="CELEDIT.8xp">Latest CELEDIT build · .8xp</small></span><b>Download</b></a>
+        <a href="/CEleste-Studio/"><span><strong>CEleste Studio</strong><small>Browser editor · opens here</small></span><b>Launch</b></a>
+        <a href="https://github.com/Lord-Funion/CEleste"><span><strong>CEleste source</strong><small>Game, runtime, CELEDIT, and format</small></span><b>GitHub</b></a>
+        <a href="https://github.com/Lord-Funion/CEleste-Studio"><span><strong>Studio source</strong><small>Editor, preview, and community browser</small></span><b>GitHub</b></a>
+        <a href="https://github.com/Lord-Funion/CEleste/releases"><span><strong>All releases</strong><small>Build history and checksums</small></span><b>Browse</b></a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>CEleste is an unofficial community project based on Celeste Classic by Maddy Thorson and Noel Berry. It is not affiliated with or endorsed by Extremely OK Games or Texas Instruments.</p>
+    <p><a href="/">Back to the terminal</a> · <a href="https://github.com/Lord-Funion">Lord-Funion on GitHub</a></p>
+  </footer>
+  <script src="hub.js?v=20260814" defer></script>
+</body>
+</html>
