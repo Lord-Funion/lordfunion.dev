@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="CEleste for TI-84 Plus CE: download the game, CEleste Studio, CELEDIT, and learn how custom levels work.">
-  <title>CEleste · Lord Funion</title>
-  <link rel="stylesheet" href="styles.css?v=20260814">
+  <title>CEleste downloads and editor tools · lordfunion.dev</title>
+  <link rel="stylesheet" href="styles.css?v=20260814-attribution">
 </head>
 <body>
   <div class="snow" aria-hidden="true"></div>
@@ -17,7 +17,7 @@
         <a href="#editors">Editors</a>
         <a href="#install">Install</a>
         <a href="#custom-levels">Custom levels</a>
-        <a href="https://github.com/Lord-Funion/CEleste">GitHub</a>
+        <a href="#credits">Credits</a>
       </div>
     </nav>
 
@@ -25,6 +25,10 @@
       <p class="eyebrow">TI-84 PLUS CE · CELESTE CLASSIC PORT + CUSTOM LEVEL ECOSYSTEM</p>
       <h1>C<span>E</span>leste</h1>
       <p class="lead">Play Celeste Classic on the TI-84 Plus CE, build your own mountains, package multi-level adventures, and move between the calculator and browser editors without changing formats.</p>
+      <aside class="authorship-note" id="credits" aria-label="CEleste authorship">
+        <strong>Lord Funion did not create CEleste.</strong>
+        <p>CEleste is a calculator port by <a href="https://github.com/commandblockguy/CEleste">John “commandblockguy” Cesarz</a>, based on <a href="https://mattmakesgames.itch.io/celesteclassic">Celeste Classic by Maddy Thorson and Noel Berry</a>. Lord Funion’s work featured here is the custom-level editor and related tooling—not the original game or calculator port.</p>
+      </aside>
       <div class="hero-actions" id="downloads">
         <a id="gameDownload" class="button primary" href="https://github.com/Lord-Funion/CEleste/releases">Download CEleste</a>
         <a class="button" href="/CEleste-Studio/">Open CEleste Studio</a>
@@ -45,17 +49,17 @@
       <article class="feature-card accent-red">
         <div class="icon">▲</div>
         <h2>CEleste</h2>
-        <p>The calculator game. It keeps the original Celeste Classic campaign and adds a custom-level browser, CELV levels and packs, extended entities, rotation, and calculator-friendly custom mechanics.</p>
+        <p>The calculator game and C++ port by John “commandblockguy” Cesarz. Lord Funion did not make this game; the editor tooling on this page works with it and its custom-level extensions.</p>
         <div class="card-actions">
           <a id="gameDownloadCard" href="https://github.com/Lord-Funion/CEleste/releases">Get the .8xp</a>
-          <a href="https://github.com/Lord-Funion/CEleste">Source</a>
+          <a href="https://github.com/commandblockguy/CEleste">Original source</a>
         </div>
       </article>
 
       <article class="feature-card accent-purple" id="editors">
         <div class="icon">▦</div>
         <h2>CEleste Studio</h2>
-        <p>The full browser editor for levels and packs: complete logical pieces, room ordering, rotation, validation, import/export, browser autosave, community levels, and original-cartridge preview.</p>
+        <p>Lord Funion’s browser editor for levels and packs: complete logical pieces, room ordering, rotation, validation, import/export, browser autosave, community levels, and original-cartridge preview.</p>
         <div class="card-actions">
           <a href="/CEleste-Studio/">Launch Studio</a>
           <a href="https://github.com/Lord-Funion/CEleste-Studio">Source</a>
@@ -65,7 +69,7 @@
       <article class="feature-card accent-blue">
         <div class="icon">⌨</div>
         <h2>CELEDIT</h2>
-        <p>The native TI-84 Plus CE editor for making CELV levels directly on the calculator. It has terrain and entity palettes, room management, rotation, properties, undo/redo, drafts, and direct AppVar export.</p>
+        <p>The calculator-native part of the custom-level editor tooling. It makes CELV levels directly on the calculator with terrain and entity palettes, room management, rotation, properties, undo/redo, drafts, and AppVar export.</p>
         <div class="card-actions">
           <a id="celeditDownloadCard" href="https://github.com/Lord-Funion/CEleste/releases">Get CELEDIT</a>
           <a href="https://github.com/Lord-Funion/CEleste/tree/master/tools/calculator-editor">Editor source</a>
@@ -149,7 +153,8 @@
       </div>
       <div class="resource-links">
         <a href="https://github.com/Lord-Funion/CEleste/releases"><b>All calculator releases</b><span>CEleste + CELEDIT builds</span></a>
-        <a href="https://github.com/Lord-Funion/CEleste"><b>CEleste repository</b><span>Game, format, CELEDIT, docs</span></a>
+        <a href="https://github.com/commandblockguy/CEleste"><b>Original CEleste source</b><span>Port by John “commandblockguy” Cesarz</span></a>
+        <a href="https://github.com/Lord-Funion/CEleste"><b>Editor and custom-level tooling</b><span>Lord Funion’s fork, CELEDIT, format, and docs</span></a>
         <a href="https://github.com/Lord-Funion/CEleste-Studio"><b>Studio repository</b><span>Browser editor source</span></a>
         <a href="/CEleste-Studio/"><b>Hosted Studio</b><span>Create or edit a level now</span></a>
       </div>
@@ -158,9 +163,9 @@
 
   <footer>
     <a href="/">← back to lordfunion.dev</a>
-    <p>Unofficial community software. CEleste is not affiliated with or endorsed by Extremely OK Games, Lexaloffle, or Texas Instruments.</p>
+    <p><strong>Authorship:</strong> CEleste was ported by John “commandblockguy” Cesarz from Celeste Classic by Maddy Thorson and Noel Berry. Lord Funion made the editor/custom-level tooling shown here, not CEleste itself. This unofficial community software is not affiliated with or endorsed by Extremely OK Games, Lexaloffle, or Texas Instruments.</p>
   </footer>
 
-  <script src="app.js?v=20260814"></script>
+  <script src="app.js?v=20260814-attribution"></script>
 </body>
 </html>
