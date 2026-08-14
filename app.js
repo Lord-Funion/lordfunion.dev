@@ -73,18 +73,10 @@
     },
     {
       command: "celeste",
-      aliases: ["celedit", "celeste-hub"],
+      aliases: ["studio", "celedit", "celeste-studio"],
       href: "/celeste/",
       label: "CEleste",
-      description: "download the game, Studio, CELEDIT, and custom-level tools",
-      featured: true,
-    },
-    {
-      command: "studio",
-      aliases: ["celeste-studio"],
-      href: "/CEleste-Studio/",
-      label: "CEleste Studio",
-      description: "open the browser level and pack editor",
+      description: "CEleste game, Studio, CELEDIT, and custom level downloads",
       featured: true,
     },
     {
@@ -331,7 +323,7 @@
     },
     "/home/visitor/projects": {
       type: "dir",
-      entries: ["CEleste", "CEleste-Studio", "DinoSwords", "GDNN", "GitHub", "Realmbound", "HolyWarsGame", "lordfunion.dev"],
+      entries: ["CEleste", "DinoSwords", "GDNN", "GitHub", "Realmbound", "HolyWarsGame", "lordfunion.dev"],
     },
     "/home/visitor/projects/Adventure-Game": {
       type: "link",
@@ -366,12 +358,7 @@
     "/home/visitor/projects/CEleste": {
       type: "link",
       href: "/celeste/",
-      description: "game, editors, downloads, and setup",
-    },
-    "/home/visitor/projects/CEleste-Studio": {
-      type: "link",
-      href: "/CEleste-Studio/",
-      description: "browser level editor",
+      description: "CEleste game, Studio, CELEDIT, and custom levels",
     },
     "/home/visitor/projects/lordfunion.dev": {
       type: "file",
