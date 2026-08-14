@@ -73,9 +73,10 @@
     },
     {
       command: "celeste",
-      aliases: ["studio"],
-      href: "/CEleste-Studio/",
-      description: "create maps for CEleste for TI 84 Plus CE",
+      aliases: ["studio", "celedit", "celeste-studio"],
+      href: "/celeste/",
+      label: "CEleste",
+      description: "CEleste game, Studio, CELEDIT, and custom level downloads",
       featured: true,
     },
     {
@@ -316,7 +317,7 @@
     },
     "/home/visitor/projects": {
       type: "dir",
-      entries: ["DinoSwords", "GDNN", "GitHub", "Realmbound", "HolyWarsGame", "lordfunion.dev"],
+      entries: ["CEleste", "DinoSwords", "GDNN", "GitHub", "Realmbound", "HolyWarsGame", "lordfunion.dev"],
     },
     "/home/visitor/projects/Adventure-Game": {
       type: "link",
@@ -347,6 +348,11 @@
       type: "link",
       href: "/HolyWarsGame",
       description: "game directory",
+    },
+    "/home/visitor/projects/CEleste": {
+      type: "link",
+      href: "/celeste/",
+      description: "CEleste game, Studio, CELEDIT, and custom levels",
     },
     "/home/visitor/projects/lordfunion.dev": {
       type: "file",
