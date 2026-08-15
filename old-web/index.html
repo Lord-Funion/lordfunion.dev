@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -128,6 +128,8 @@
       flex-wrap: wrap;
       gap: 8px;
       margin: 14px 0;
+      padding: 0;
+      list-style: none;
     }
 
     .badge {
@@ -170,7 +172,8 @@
 
       <div class="content">
         <nav aria-label="Old web navigation">
-          <a href="/">Home Terminal</a>
+          <a href="/main">Home Terminal</a>
+          <a href="/">Lord Funion Hub</a>
           <a href="/Adventure-Game/">Adventure Game</a>
           <a href="/HolyWarsGame">Holy Wars Game</a>
           <a href="https://github.com/Lord-Funion">GitHub</a>
@@ -183,12 +186,12 @@
             just blinking text, suspicious borders, and the comforting hum of old links.
           </p>
 
-          <div class="badge-row" aria-label="decorative badges">
-            <span class="badge">HTML POWERED</span>
-            <span class="badge">NO TRACKERS</span>
-            <span class="badge">WEBRING READY</span>
-            <span class="badge">404 ENERGY</span>
-          </div>
+          <ul class="badge-row" aria-label="Decorative badges">
+            <li class="badge">HTML POWERED</li>
+            <li class="badge">NO TRACKERS</li>
+            <li class="badge">WEBRING READY</li>
+            <li class="badge">404 ENERGY</li>
+          </ul>
 
           <section class="guestbook">
             <h2>Guestbook</h2>
