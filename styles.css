@@ -199,7 +199,7 @@ input {
 
 .terminal-bar {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   gap: 10px;
   align-items: center;
   min-height: 36px;
@@ -226,6 +226,24 @@ input {
 
 .terminal-status {
   color: var(--text-soft);
+}
+
+.hub-return {
+  border: 1px solid var(--line);
+  padding: 2px 7px;
+  color: var(--link);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-decoration: none;
+  text-shadow: none;
+  white-space: nowrap;
+}
+
+.hub-return:hover,
+.hub-return:focus-visible {
+  background: var(--text);
+  color: var(--selection-text);
+  outline: 0;
 }
 
 .terminal-screen {
@@ -332,6 +350,16 @@ input {
   text-shadow: none;
 }
 
+.terminal-submit {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .noscript-link {
   position: fixed;
   inset: auto 12px 12px;
@@ -411,6 +439,10 @@ input {
 
   .terminal-status {
     display: none;
+  }
+
+  .terminal-bar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
   .prompt-line {

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The interactive Lord Funion terminal: games, experiments, downloads, and coding projects by Finn Lambert.">
+  <meta name="theme-color" content="#000000">
+  <title>Lord Funion Main Site — Games &amp; Projects</title>
+  <link rel="canonical" href="https://lordfunion.dev/main">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000000'/%3E%3Ctext x='8' y='40' font-size='24' font-family='monospace' fill='%2339ff14'%3E%3E_%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css?v=20260815-hub-migration">
+</head>
+<body>
+  <main class="terminal-shell" aria-label="lordfunion.dev terminal">
+    <section class="terminal-window">
+      <div class="terminal-bar">
+        <span class="terminal-led" aria-hidden="true"></span>
+        <span class="terminal-title">lordfunion.dev:/main</span>
+        <a class="hub-return" href="/">Lord Funion Hub</a>
+        <span class="terminal-status" aria-hidden="true">ONLINE</span>
+      </div>
+
+      <div id="screen" class="terminal-screen" aria-live="polite">
+        <pre class="site-logo" aria-hidden="true">
+ _               _  __             _
+| | ___  _ __ __| |/ _|_   _ _ __ (_) ___  _ __
+| |/ _ \| '__/ _` | |_| | | | '_ \| |/ _ \| '_ \
+| | (_) | | | (_| |  _| |_| | | | | | (_) | | | |
+|_|\___/|_|  \__,_|_|  \__,_|_| |_|_|\___/|_| |_|
+        </pre>
+        <div id="output" class="terminal-output"></div>
+        <form id="prompt-form" class="prompt-line" autocomplete="off">
+          <label for="command-input" class="prompt-label">visitor@lordfunion.dev:~$</label>
+          <input id="command-input" class="command-input" type="text" spellcheck="false" autocapitalize="none" autofocus>
+          <button class="terminal-submit" type="submit">Run command</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <noscript>
+    <p class="noscript-link">
+      JavaScript is required for the terminal.
+      <a href="/">Lord Funion Hub</a>
+      <a href="/GDNN/">GDNN</a>
+      <a href="https://dinoswords.lordfunion.dev/">DinoSwords</a>
+      <a href="/realmbound/">Realmbound</a>
+      <a href="/HolyWarsGame">Holy Wars Game</a>
+      <a href="https://github.com/Lord-Funion">GitHub</a>
+      <a href="/celeste/">CEleste</a>
+      <a href="/CEleste-Studio/">CEleste Studio</a>
+    </p>
+  </noscript>
+
+  <script src="/app.js?v=20260815-hub-migration"></script>
+</body>
+</html>
